@@ -1,11 +1,12 @@
-HELP.md
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# Maven
+/target/
+**/target/
 
-### STS ###
-.apt_generated
+# Firebase secret
+src/main/resources/google/*.json
+
+# IDEs
+# STS / Eclipse
 .classpath
 .factorypath
 .project
@@ -13,13 +14,13 @@ target/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
+# IntelliJ IDEA
 .idea
 *.iws
 *.iml
 *.ipr
 
-### NetBeans ###
+# NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
@@ -29,15 +30,13 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
+# VS Code
 .vscode/
 
-
-
+# OS & logs
 .DS_Store
-.zip
-.rar
-.log
-.gz
+*.zip
+*.rar
 *.log
 /logs/
+*.gz
