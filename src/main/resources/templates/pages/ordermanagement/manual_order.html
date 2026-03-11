@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="base::layout(~{::section})">
+	<body>
+    <section class="content">
+
+      <!-- Default box -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Create Order</h3>
+
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+              <i class="fas fa-minus"></i>
+            </button>
+            <!-- <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+              <i class="fas fa-times"></i>
+            </button> -->
+          </div>
+        </div>
+
+
+        <div class="card-body">
+        <div class="container">
+          <div class="row">
+            <div class="col-sm-3">
+
+              <label>Product SKU</label>
+              <input type="text" class="form-control" placeholder="Enter Code">
+            </div>
+            <div class="col-sm-6">
+              <label>Product Name</label>
+              <input type="text" class="form-control" placeholder="Enter Vendor Name">
+            </div>
+
+            <div class="col-sm-3">
+              <!-- select -->
+              <div class="form-group">
+                <label>Select Offer Type</label>
+                <select class="form-control">
+                  <option>Company</option>
+                  <option>Individual</option>
+                 </select>
+              </div>
+            </div>
+          </div>
+        </div>
+	</body>
+</html>

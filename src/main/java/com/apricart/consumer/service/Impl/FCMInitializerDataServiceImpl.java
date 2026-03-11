@@ -1,0 +1,128 @@
+package com.apricart.consumer.service.Impl;
+
+import com.apricart.consumer.security.dto.dto.PushNotificationDTO;
+import com.apricart.consumer.security.utils.NotificationParameter;
+import com.apricart.consumer.service.FCMInitializerDataService;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.messaging.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
+@Service
+public class FCMInitializerDataServiceImpl implements FCMInitializerDataService {
+
+    private final String firebaseConfigPath;
+
+    public FCMInitializerDataServiceImpl(@Value("${app.firebase-configuration-file}") String firebaseConfigPath) {
+        this.firebaseConfigPath = firebaseConfigPath;
+    }
+
+    @PostConstruct
+    public void initializeFirebase() {
+        try {
+            FirebaseOptions options = new FirebaseOptions.Builder()
+                    .setCredentials(GoogleCredentials.fromStream(new ClassPathResource(firebaseConfigPath).getInputStream()))
+                    .build();
+            if (FirebaseApp.getApps().isEmpty()) {
+                FirebaseApp.initializeApp(options);
+                System.out.println("Firebase application has been initialized");
+            }
+        } catch (IOException e) {
+            System.out.println("Error initializing Firebase: " + e.getMessage());
+        }
+    }
+
+    public void sendMessageBroadcast(PushNotificationDTO request) {
+        sendMessageBroadcast(new HashMap<>(), request);
+    }
+
+    public void sendMessageBroadcast(Map<String, String> data, PushNotificationDTO request) {
+        if (data.isEmpty()) {
+            data.put("title", request.getTitle());
+            data.put("body", request.getMessage());
+        }
+        Message message = getPreconfiguredMessageWithData(data, request);
+        sendNotification(message);
+    }
+
+    public void sendMessageToToken(PushNotificationDTO request) {
+        sendMessageToToken(new HashMap<>(), request);
+    }
+
+    public void sendMessageToToken(Map<String, String> data, PushNotificationDTO request) {
+        request.setTopic(request.getTitle());
+        if (data.isEmpty()) {
+            data.put("title", request.getTitle());
+            data.put("body", request.getMessage());
+        }
+        Message message = getPreconfiguredMessageToTokenMessageWithData(data, request);
+        sendNotification(message);
+    }
+
+    private void sendNotification(Message message) {
+        try {
+            String response = FirebaseMessaging.getInstance().sendAsync(message).get();
+            System.out.println("\nFCM Notification Response: " + response);
+        } catch (InterruptedException | ExecutionException e) {
+            System.out.println("Error sending FCM notification: " + e.getMessage());
+        }
+    }
+
+    private AndroidConfig getAndroidConfig(String channel) {
+        return AndroidConfig.builder()
+                .setTtl(Duration.ofMinutes(2).toMillis())
+                .setCollapseKey(channel)
+                .setPriority(AndroidConfig.Priority.HIGH)
+                .setNotification(AndroidNotification.builder()
+                        .setSound(NotificationParameter.SOUND.getValue())
+                        .setChannelId(channel)
+                        .setColor(NotificationParameter.COLOR.getValue())
+                        .setTag(channel)
+                        .build())
+                .build();
+    }
+
+    private ApnsConfig getApnsConfig(String channel) {
+        return ApnsConfig.builder()
+                .setAps(Aps.builder()
+                        .setSound(NotificationParameter.SOUND.getValue())
+                        .setCategory(channel)
+                        .setContentAvailable(true)
+                        .setThreadId(channel)
+                        .build())
+                .build();
+    }
+
+    private Message.Builder getPreconfiguredMessageBuilder(PushNotificationDTO request) {
+        AndroidConfig androidConfig = getAndroidConfig(request.getChannel());
+        ApnsConfig apnsConfig = getApnsConfig(request.getChannel());
+        return Message.builder()
+                .setApnsConfig(apnsConfig)
+                .setAndroidConfig(androidConfig)
+                .setNotification(new Notification(request.getTitle(), request.getMessage()));
+    }
+
+    private Message getPreconfiguredMessageWithData(Map<String, String> data, PushNotificationDTO request) {
+        return getPreconfiguredMessageBuilder(request)
+                .putAllData(data)
+                .setTopic(request.getTopic())
+                .build();
+    }
+
+    private Message getPreconfiguredMessageToTokenMessageWithData(Map<String, String> data, PushNotificationDTO request) {
+        return getPreconfiguredMessageBuilder(request)
+                .putAllData(data)
+                .setToken(request.getToken())
+                .build();
+    }
+}

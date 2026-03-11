@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="base::layout(~{::section})">
+<body>
+
+<!-- Content Header (Page header) -->
+<div class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1 class="m-0">Product Search</h1>
+      </div><!-- /.col -->
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="#">Home</a></li>
+          <li class="breadcrumb-item active">Product Search</li>
+        </ol>
+      </div><!-- /.col -->
+    </div><!-- /.row -->
+  </div><!-- /.container-fluid -->
+</div>
+<!-- /.content-header -->
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-10 offset-md-1">
+        <div class="input-group input-group-lg" style="margin-top:20px;">
+          <input type="search" id="mySearchInput" class="form-control form-control-lg" placeholder="Type your search keywords here" th:value="${term}">
+          <div class="input-group-append">
+            <button type="submit" class="btn btn-lg btn-default" onclick="updateValue()">
+              <i class="fa fa-search"></i>
+            </button>
+          </div>
+        </div>
+<!--        <div class="col-sm-4">-->
+<!--          <label for="All"> </label>-->
+<!--          <br>-->
+<!--          <select name="All" id="all" class="form-control" >-->
+<!--            <option value="">All</option>-->
+<!--            <option value="1">Category 1</option>-->
+<!--            <option value="2">Category 2</option>-->
+<!--          </select>-->
+<!--        </div>-->
+
+      </div>
+      <div class="row col-sm-12">
+        <div class="col-md-10 offset-md-1">
+          <div class="list-group">
+            <div th:each="product: ${productsDtoList}">
+              <div class="list-group-item" th:id="${product.sku}" style="margin-top: 20px;">
+                <div class="row">
+                  <div class="col-sm-4">
+                    <img class="img-fluid" th:src="${product.productImageUrl}" alt="Photo" style="max-height: 160px;">
+                  </div>
+                  <div class="col-sm-5">
+                    <div class="product_show">
+
+                      <h3 th:text="${product.title}"></h3>
+                      <sub th:text="${product.categoryleafName}"></sub>
+                      <p class="mb-0" th:text="${product.description}"></p>
+                    </div>
+                  </div>
+                  <div class="col-sm-3">
+                    <div class="price_cont">
+                      <div class="float-right">
+                        <div class="float-right date_and_t" th:text="${product.updateTime}"></div>
+                        <p>Current Price: <span th:text="${product.currentPrice}"></span></p>
+                        <p>Special Price: <span th:text="${product.specialPrice}"></span></p>
+                        <a th:href="@{/productdetails(sku=${product.sku})}"><button class="btn btn-primary float-right pro_del">Details</button></a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="pagination">
+            <a href="#">&laquo;</a>
+            <a href="#">1</a>
+            <a href="#">2</a>
+            <a href="#">3</a>
+            <a href="#">4</a>
+            <a href="#">5</a>
+            <a href="#">6</a>
+            <a href="#">&raquo;</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var input = document.getElementById("mySearchInput");
+    input.addEventListener('keyup', updateValue);
+
+    function updateValue(e) {
+      try {
+        if (e.keyCode === 13) { // enter pressed
+          getData(input.value);
+        }
+      } catch(err) { // button pressed
+        getData(input.value);
+      }
+    }
+
+    function getData(value) {
+      location.href = '/productsearch?term='+value;
+    }
+  </script>
+
+</section>
+
+</body>
+</html>

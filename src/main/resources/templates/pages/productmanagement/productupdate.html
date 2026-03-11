@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="base::layout(~{::section})">
+<body>
+
+<!-- Content Header (Page header) -->
+<div class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1 class="m-0">Product Search</h1>
+      </div><!-- /.col -->
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="#">Home</a></li>
+          <li class="breadcrumb-item active">Product Search</li>
+        </ol>
+      </div><!-- /.col -->
+    </div><!-- /.row -->
+  </div><!-- /.container-fluid -->
+</div>
+<!-- /.content-header -->
+
+<section class="content">
+
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Update Product</h3>
+
+      <div class="card-tools">
+        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+          <i class="fas fa-minus"></i>
+        </button>
+        <!-- <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+          <i class="fas fa-times"></i>
+        </button> -->
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-4">
+
+            <img th:src="${product.productImageUrl}" class="rounded float-left" alt="..." style="width: 300px;">
+
+            <br>
+            <br>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-4">
+            <input type="file" accept="image/png" onchange="readURL(this);">
+            <img id="blah" src="#" alt="Choose file">
+            <!-- <img src="../../dist/img/default-150x150.png" class="rounded float-left" alt="...">      -->
+
+            <br>
+            <br>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!--
+              <div class="container">
+
+                  <div class="col-sm-4">
+                    <div class="input-group mb-3">
+                      <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="inputGroupFile02">
+                        <label class="custom-file-label" for="inputGroupFile02">Choose file</label>
+                      </div>
+                      <div class="input-group-append">
+                        <span class="input-group-text" id="">Upload</span>
+                      </div>
+                    </div>
+
+            </div>
+
+    </div> -->
+
+
+
+    <div class="card-body">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-6">
+            <h4>SKU</h4>
+            <!-- <label>Item Code</label>
+            <input type="text" class="form-control" placeholder="Enter SKU">  -->
+            <p th:text="${product.sku}"></p>
+          </div>
+          <div class="col-sm-6">
+            <!-- <label>Item Name</label>
+            <input type="text" class="form-control" placeholder="Enter Product Name">  -->
+            <h4 th:text="${product.title}"></h4>
+          </div>
+          <!-- <div class="col-sm-3">
+            <label>Item Category</label>
+            <input type="text" class="form-control" placeholder="Enter Item Category">
+          </div> -->
+
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-2">
+
+            <label>Categoryleaf_id</label>
+            <input type="id" class="form-control" placeholder="Enter Categoryleaf_id" th:value="${product.categoryleafId}">
+          </div>
+          <div class="col-sm-4">
+
+            <label>Category Name</label>
+            <input type="text" disabled class="form-control" placeholder="Enter Category Name" th:value="${product.categoryleafName}">
+          </div>
+          <!-- <div class="col-sm-6">
+              <label for="product">Is Active</label>
+              <br>
+              <select name="product" id="product" class="form-control" >
+                <option value=""></option>
+                <option value="true">Yes</option>
+                <option value="False">No</option>
+              </select>
+          </div> -->
+          <!-- <div class="col-sm-4">
+      <label>Tags</label>
+            <input type="text" class="form-control" placeholder="Tag">
+    </div> -->
+          <div class="col-sm-6">
+            <label>Product Description</label>
+            <input type="text" class="form-control" placeholder="Enter Product Description" th:value="${product.description}">
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="container">
+        <div class="row">
+          <!-- <div class="col-sm-5">
+            <label>Barcode</label>
+                  <input type="text" class="form-control" placeholder="Barcode">
+          </div> -->
+          <div class="col-sm-6">
+            <label>Tags</label>
+            <input type="text" class="form-control" placeholder="Tag" th:value="${product.tag}">
+          </div>
+          <div class="col-sm-6">
+            <label>Barcode</label>
+            <input type="text" class="form-control" placeholder="Barcode" th:value="${product.barcode}">
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr>
+
+    <div class="card-body">
+      <div class="container">
+        <div class="row">
+          <!--  <div class="col-sm-6">
+             <label>Barcode</label>
+                   <input type="text" class="form-control" placeholder="Barcode">
+           </div> -->
+
+<!--          <div class="col-sm-3">-->
+<!--            <label for="product">Is Active</label>-->
+<!--            <br>-->
+<!--            <select name="product" id="product" class="form-control">-->
+<!--              <option value=""></option>-->
+<!--              <option value="true">Yes</option>-->
+<!--              <option value="False">No</option>-->
+<!--            </select>-->
+<!--          </div>-->
+
+<!--          <div class="col-sm-3">-->
+<!--            <label>In Stock / Out Stock</label>-->
+<!--            <br>-->
+<!--            <select name="product" id="product" class="form-control">-->
+<!--              <option value=""></option>-->
+<!--              <option value="true">In Stock</option>-->
+<!--              <option value="False">Out Of Stock</option>-->
+<!--            </select>-->
+<!--          </div>-->
+          <div class="col-sm-6">
+            <label>Current Price</label>
+            <input type="text" class="form-control" placeholder="Current Price" th:value="${product.currentPrice}">
+          </div>
+          <div class="col-sm-6">
+            <label>Special Price</label>
+            <input type="text" class="form-control" placeholder="Special Price" th:value="${product.specialPrice}">
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- <hr>
+    <div class="card-body">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-7">
+            <label>Product Description</label>
+            <input type="text" class="form-control" placeholder="Enter Product Description">
+          </div>
+
+        <div class="col-sm-4">
+          <label>In Stock / Out Stock</label>
+                <br>
+                <select name="product" id="product" class="form-control" >
+                  <option value=""></option>
+                  <option value="true">In Stock</option>
+                  <option value="False">Out Of Stock</option>
+                </select>
+        </div>
+          <div class="col-sm-4">
+            <label>Current Price</label>
+                  <input type="text" class="form-control" placeholder="Current Price">
+          </div>
+          <div class="col-sm-4">
+            <label>Special Price</label>
+            <input type="text" class="form-control" placeholder="Special Price">
+          </div>
+
+
+
+        </div>
+      </div>
+    </div> -->
+
+    <div class="card-body">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-4">
+            <label>Stock Quantity</label>
+            <input type="text" class="form-control" placeholder="Quantity" th:value="${product.qty}">
+            <span> (0 will put product out of stock and value greater than 0 will put product in stock)</span>
+          </div>
+          <div class="col-sm-4">
+            <label>Min Quantity</label>
+            <input type="text" class="form-control" placeholder="Min Quantity" th:value="${product.minQty}">
+          </div>
+          <div class="col-sm-4">
+            <label>Max Quantity</label>
+            <input type="text" class="form-control" placeholder="Max Quantity" th:value="${product.maxQty}">
+          </div>
+
+
+
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="container">
+        <div class="row">
+
+          <div class="col-sm-12">
+            <label for="city">City Name</label>
+            <br>
+            <select name="product" id="product" class="form-control">
+              <option value="">Select City</option>
+              <option value="1">Karachi</option>
+              <option value="4">Peshawar</option>
+            </select>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <div class="card-body">
+      <div class="container">
+        <div class="col-sm-1">
+
+          <button type="button" class="btn btn-block btn-primary btn-sm " id="myBtn" th:if="${allowEdit == true}" >Update</button>
+        </div>
+        <div class="toast mt-3">
+          <div class="toast-header">
+            Update
+          </div>
+          <div class="toast-body">
+            Are You sure
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+
+</section>
+
+</body>
+</html>
