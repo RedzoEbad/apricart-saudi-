@@ -22,17 +22,31 @@ import java.util.concurrent.ExecutionException;
 public class FCMInitializerDataServiceImpl implements FCMInitializerDataService {
 
     private final String firebaseConfigPath;
+    private final String firebaseConfigJson;
 
-    public FCMInitializerDataServiceImpl(@Value("${app.firebase-configuration-file}") String firebaseConfigPath) {
+    public FCMInitializerDataServiceImpl(
+            @Value("${app.firebase-configuration-file}") String firebaseConfigPath,
+            @Value("${app.firebase-configuration-json:#{null}}") String firebaseConfigJson) {
         this.firebaseConfigPath = firebaseConfigPath;
+        this.firebaseConfigJson = firebaseConfigJson;
     }
 
     @PostConstruct
     public void initializeFirebase() {
         try {
+            GoogleCredentials credentials;
+            if (firebaseConfigJson != null && !firebaseConfigJson.isEmpty()) {
+                credentials = GoogleCredentials.fromStream(new java.io.ByteArrayInputStream(firebaseConfigJson.getBytes()));
+                System.out.println("Initializing Firebase using JSON environment variable");
+            } else {
+                credentials = GoogleCredentials.fromStream(new ClassPathResource(firebaseConfigPath).getInputStream());
+                System.out.println("Initializing Firebase using config file: " + firebaseConfigPath);
+            }
+
             FirebaseOptions options = new FirebaseOptions.Builder()
-                    .setCredentials(GoogleCredentials.fromStream(new ClassPathResource(firebaseConfigPath).getInputStream()))
+                    .setCredentials(credentials)
                     .build();
+
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseApp.initializeApp(options);
                 System.out.println("Firebase application has been initialized");
