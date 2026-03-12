@@ -18,7 +18,8 @@ import java.io.File;
 @Service
 public class EmailServiceImpl implements EmailService {
 
-    private static final String NOREPLY_ADDRESS = "hello@apricart.ai";
+    @Value("${spring.mail.username}")
+    private String senderAddress;
 
     @Autowired
     private JavaMailSender emailSender;
@@ -32,7 +33,7 @@ public class EmailServiceImpl implements EmailService {
     public void sendSimpleMessage(String to, String subject, String text) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(NOREPLY_ADDRESS);
+            message.setFrom(senderAddress);
             message.setTo(to);
             message.setSubject(subject);
             message.setText(text);
@@ -50,7 +51,7 @@ public class EmailServiceImpl implements EmailService {
             // pass 'true' to the constructor to create a multipart message
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-            helper.setFrom(NOREPLY_ADDRESS);
+            helper.setFrom(senderAddress);
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(text);
@@ -70,7 +71,7 @@ public class EmailServiceImpl implements EmailService {
 
         MimeMessage message = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-        helper.setFrom(NOREPLY_ADDRESS);
+        helper.setFrom(senderAddress);
         helper.setTo(to);
         helper.setSubject(subject);
         helper.setText(htmlBody, true);
@@ -84,7 +85,7 @@ public class EmailServiceImpl implements EmailService {
 
         MimeMessage message = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-        helper.setFrom(NOREPLY_ADDRESS);
+        helper.setFrom(senderAddress);
         helper.setTo(to);
         helper.setSubject(subject);
         helper.setText(htmlBody, true);

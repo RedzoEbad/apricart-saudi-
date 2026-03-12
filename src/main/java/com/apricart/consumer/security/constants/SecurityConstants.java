@@ -17,12 +17,12 @@ public class SecurityConstants {
 	 * Token expiration time 30 days.
 	 */
 	public static final long EXPIRATION_TIME = 30L * 24 * 60 * 60 * 1000;
-//	public static final long EXPIRATION_TIME = 60 * 1000;
+	// public static final long EXPIRATION_TIME = 60 * 1000;
 
 	/**
 	 * Secret key for signature
 	 */
-	public static final String SECRET_KEY = "mySecretKey";
+	public static String SECRET_KEY = "mySecretKey";
 
 	/**
 	 * The company who provided token.

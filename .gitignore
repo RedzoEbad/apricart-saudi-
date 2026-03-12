@@ -5,6 +5,7 @@
 # Firebase secret
 src/main/resources/google/*.json
 
+
 # IDEs
 # STS / Eclipse
 .classpath
