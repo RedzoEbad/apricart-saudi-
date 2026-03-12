@@ -1,20 +1,13 @@
-# As Scrapy runs on Python, I choose the official Python 3 Docker image.
-# cd /Users/farrukhellahi/Dropbox/ApriCart/Server/java/apricart-spring-boot-backend
-# docker build -t apricart-backend:latest .
-# docker run apricart-backend
+# Build stage
+FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-
-# clear && cd /Users/farrukhellahi/Dropbox/ApriCart/Server/java/apricart-spring-boot-backend && docker build -t apricart-backend:latest . && docker run apricart-backend
-
-FROM ubuntu:20.04
-
-# Create app directory
-WORKDIR /usr/src/app
-
-COPY . .
-
-RUN apt update
-RUN apt install -y maven
-RUN mvn clean package
-
-ENTRYPOINT [ "nohup", "java", "-jar", "target/apricart-spring-boot-SNAPSHOT.jar" ]
+# Run stage
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+COPY --from=build /app/target/apricart-spring-boot-SNAPSHOT.jar app.jar
+EXPOSE 8081
+ENTRYPOINT ["java", "-jar", "app.jar"]
