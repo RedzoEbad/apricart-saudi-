@@ -1,12 +1,22 @@
-# Environment variables
+# Environment variables and secrets
 .env
+.env*
+RSA/
+*.key
+*.pem
 
-# Maven
-/target/
-**/target/
+# Backups and Git-in-Git
+*.git
+*.zip
+*.rar
+*.bak
+apricart-backup.git/
 
-# Firebase secret
-src/main/resources/google/*.json
+# Logs and large output files
+nohup.out
+*.log
+/logs/
+var/lucene/indexes/
 
 
 # IDEs
