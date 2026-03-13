@@ -36,7 +36,7 @@ public class FCMInitializerDataServiceImpl implements FCMInitializerDataService 
         try {
             GoogleCredentials credentials;
             if (firebaseConfigJson != null && !firebaseConfigJson.isEmpty()) {
-                credentials = GoogleCredentials.fromStream(new java.io.ByteArrayInputStream(firebaseConfigJson.getBytes()));
+                credentials = GoogleCredentials.fromStream(new java.io.ByteArrayInputStream(firebaseConfigJson.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
                 System.out.println("Initializing Firebase using JSON environment variable");
             } else {
                 credentials = GoogleCredentials.fromStream(new ClassPathResource(firebaseConfigPath).getInputStream());
@@ -51,8 +51,9 @@ public class FCMInitializerDataServiceImpl implements FCMInitializerDataService 
                 FirebaseApp.initializeApp(options);
                 System.out.println("Firebase application has been initialized");
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.println("Error initializing Firebase: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
