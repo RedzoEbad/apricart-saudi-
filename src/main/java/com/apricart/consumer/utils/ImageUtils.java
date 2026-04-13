@@ -103,10 +103,10 @@ public class ImageUtils {
     public String getImagePath(String imageUrl) {
         String baseUrl = environment.getProperty("server.consumer.baseurl", "http://localhost:8081");
         if (imageUrl != null && !imageUrl.isEmpty()) {
-            if (imageUrl.startsWith(baseUrl)) {
+            if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://") || imageUrl.startsWith(baseUrl)) {
                 return imageUrl;
             } else {
-                return baseUrl + imageUrl;
+                return baseUrl + (imageUrl.startsWith("/") ? imageUrl : "/" + imageUrl);
             }
         }
         return "";
