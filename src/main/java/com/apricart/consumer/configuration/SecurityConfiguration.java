@@ -16,6 +16,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
 
 /**
  * Created on January, 2024
@@ -45,6 +46,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.cors().and().csrf().disable()
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 				.authorizeRequests()
+				.antMatchers(HttpMethod.GET, "/v1/products").permitAll()
 				.antMatchers(getPermittedUrls()).permitAll()
 				.anyRequest().authenticated().and()
 				.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
@@ -57,7 +59,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	}
 
 	private String[] getPermittedUrls() {
-		return new String[]{
+		return new String[] {
 				"/",
 				"/login",
 				"/v1/auth/open/**",
