@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 public class SalePerson extends BaseEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
