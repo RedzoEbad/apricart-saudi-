@@ -39,7 +39,6 @@ public class RegistrationRequest  {
 	@Pattern(regexp = "\\+?[0-9]+", message = "Invalid phone number format")
 	private String phoneNumber;
 
-	@NotNull(message = "City ID is required")
 	private Long cityId;
 
 	@NotNull(message = "Salesperson ID is required")

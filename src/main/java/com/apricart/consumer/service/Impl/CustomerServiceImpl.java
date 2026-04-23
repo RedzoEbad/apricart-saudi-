@@ -1,5 +1,6 @@
 package com.apricart.consumer.service.Impl;
 
+import com.apricart.consumer.enity.City;
 import com.apricart.consumer.enity.Customer;
 import com.apricart.consumer.enity.Otp;
 import com.apricart.consumer.exceptions.RegistrationException;
@@ -35,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static com.apricart.consumer.security.constants.ArabicResponseMessages.*;
@@ -104,7 +106,10 @@ public class CustomerServiceImpl implements CustomerService {
             if (Boolean.TRUE.equals(activeCustomer.getIsActive())) {
                 return activeCustomer;
             } else {
-                throw new ResourceNotFoundException(LanguageType.ARB.equals(lang) ? String.format(CUSTOMER_NOT_ACTIVE_WITH_ID_ARABIC, id) : String.format(CUSTOMER_NOT_ACTIVE_WITH_ID, id), true);
+                throw new ResourceNotFoundException(
+                        LanguageType.ARB.equals(lang) ? String.format(CUSTOMER_NOT_ACTIVE_WITH_ID_ARABIC, id)
+                                : String.format(CUSTOMER_NOT_ACTIVE_WITH_ID, id),
+                        true);
             }
         } else {
             if (LanguageType.ARB.equals(lang)) {
@@ -144,14 +149,16 @@ public class CustomerServiceImpl implements CustomerService {
         String name = StringUtils.capitalize(request.getName());
 
         if (!Utilities.isValidSaudiPhoneNumber(phoneNumber)) {
-            return lang.equals(LanguageType.ARB) ? Response.error(INVALID_PHONE_NUMBER_ERROR_ARABIC) : Response.error(INVALID_PHONE_NUMBER_ERROR);
+            return lang.equals(LanguageType.ARB) ? Response.error(INVALID_PHONE_NUMBER_ERROR_ARABIC)
+                    : Response.error(INVALID_PHONE_NUMBER_ERROR);
         }
 
         try {
             phoneNumber = Utilities.cleanSaudiPhoneNumber(phoneNumber);
             request.setUserName(phoneNumber);
             if (customerRepository.existsByPhoneNumber(phoneNumber)) {
-                return lang.equals(LanguageType.ARB) ? Response.error(USER_EXISTS_ERROR_ARABIC) : Response.error(USER_EXISTS_ERROR);
+                return lang.equals(LanguageType.ARB) ? Response.error(USER_EXISTS_ERROR_ARABIC)
+                        : Response.error(USER_EXISTS_ERROR);
             }
 
             userValidationService.validateUser(request);
@@ -160,15 +167,28 @@ public class CustomerServiceImpl implements CustomerService {
 
             otpService.generateOTP(OTPRequest.builder().phoneNumber(phoneNumber).build(), lang);
 
-            return lang.equals(LanguageType.ARB) ? Response.success(REGISTRATION_SUCCESSFUL_ARABIC) : Response.success(REGISTRATION_SUCCESSFUL);
+            return lang.equals(LanguageType.ARB) ? Response.success(REGISTRATION_SUCCESSFUL_ARABIC)
+                    : Response.success(REGISTRATION_SUCCESSFUL);
 
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e.getCause());
-            return lang.equals(LanguageType.ARB) ? Response.error(ERROR_FAILED_ARABIC.concat(e.getMessage() != null ? e.getMessage() : ((RegistrationException) e).getErrorMessage())) : Response.error(ERROR_FAILED.concat(e.getMessage() != null ? e.getMessage() : ((RegistrationException) e).getErrorMessage()));
+            return lang.equals(LanguageType.ARB)
+                    ? Response.error(ERROR_FAILED_ARABIC.concat(
+                            e.getMessage() != null ? e.getMessage() : ((RegistrationException) e).getErrorMessage()))
+                    : Response.error(ERROR_FAILED.concat(
+                            e.getMessage() != null ? e.getMessage() : ((RegistrationException) e).getErrorMessage()));
         }
     }
 
-    public Customer createUserFromRegistrationRequest(RegistrationRequest request, String phoneNumber, LanguageType languageType) throws UnknownHostException {
+    public Customer createUserFromRegistrationRequest(RegistrationRequest request, String phoneNumber,
+            LanguageType languageType) throws UnknownHostException {
+        Long cityId = request.getCityId();
+        if (cityId == null) {
+            List<City> cities = cityService.getAllCities();
+            if (!cities.isEmpty()) {
+                cityId = cities.get(0).getId();
+            }
+        }
         return Customer.builder()
                 .name(request.getName())
                 .arabicName(request.getArabicName())
@@ -182,7 +202,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .updateDateTime(LocalDateTime.now())
                 .tradelicense(request.getTradelicense())
                 .typeOfBusiness(request.getTypeOfBusiness())
-                .city(cityService.findById(request.getCityId(), languageType))
+                .city(cityService.findById(cityId, languageType))
                 .salePerson(salePersonService.findSalePersonById(request.getSalesPersonId()))
                 .ipAddress(String.valueOf(InetAddress.getLocalHost()))
                 .build();
@@ -195,8 +215,8 @@ public class CustomerServiceImpl implements CustomerService {
 
             Customer customer = customerRepository.findByPhoneNumber(phoneNumber);
             if (customer == null) {
-                return lang.equals(LanguageType.ARB) ? Response.notFound(ACCOUNT_NOT_FOUND_ARABIC) :
-                        Response.notFound(ACCOUNT_NOT_FOUND);
+                return lang.equals(LanguageType.ARB) ? Response.notFound(ACCOUNT_NOT_FOUND_ARABIC)
+                        : Response.notFound(ACCOUNT_NOT_FOUND);
             }
 
             String newPassword = bCryptPasswordEncoder.encode(forgotPasswordRequest.getPassword());
@@ -218,25 +238,31 @@ public class CustomerServiceImpl implements CustomerService {
                     .email(customer.getEmail())
                     .build();
 
-            return lang.equals(LanguageType.ARB) ? Response.success(PASSWORD_UPDATED_SUCCESS_ARABIC, loginResponse) : Response.success(PASSWORD_UPDATED_SUCCESS, loginResponse);
+            return lang.equals(LanguageType.ARB) ? Response.success(PASSWORD_UPDATED_SUCCESS_ARABIC, loginResponse)
+                    : Response.success(PASSWORD_UPDATED_SUCCESS, loginResponse);
         } catch (Exception e) {
             log.error("Error : {}", e.getMessage(), e);
-            return lang.equals(LanguageType.ARB) ? Response.error(PASSWORD_RESET_FAILED_ARABIC) : Response.error(PASSWORD_RESET_FAILED);
+            return lang.equals(LanguageType.ARB) ? Response.error(PASSWORD_RESET_FAILED_ARABIC)
+                    : Response.error(PASSWORD_RESET_FAILED);
         }
     }
 
     @Override
-    public ResponseEntity<?> updatePassword(UpdatePasswordRequest updatePasswordRequest, Customer customer, LanguageType lang) {
+    public ResponseEntity<?> updatePassword(UpdatePasswordRequest updatePasswordRequest, Customer customer,
+            LanguageType lang) {
         if (!Boolean.TRUE.equals(customer.getIsActive())) {
-            return lang.equals(LanguageType.ARB) ? Response.error(USER_NOT_ACTIVE_ERROR_MESSAGE_ARABIC) : Response.error(USER_NOT_ACTIVE_ERROR_MESSAGE);
+            return lang.equals(LanguageType.ARB) ? Response.error(USER_NOT_ACTIVE_ERROR_MESSAGE_ARABIC)
+                    : Response.error(USER_NOT_ACTIVE_ERROR_MESSAGE);
         }
 
         if (!bCryptPasswordEncoder.matches(updatePasswordRequest.getCurrentPassword(), customer.getPassword())) {
-            return lang.equals(LanguageType.ARB) ? Response.error(INCORRECT_PASSWORD_ERROR_MESSAGE_ARABIC) : Response.error(INCORRECT_PASSWORD_ERROR_MESSAGE);
+            return lang.equals(LanguageType.ARB) ? Response.error(INCORRECT_PASSWORD_ERROR_MESSAGE_ARABIC)
+                    : Response.error(INCORRECT_PASSWORD_ERROR_MESSAGE);
         }
 
         if (bCryptPasswordEncoder.matches(updatePasswordRequest.getNewPassword(), customer.getPassword())) {
-            return lang.equals(LanguageType.ARB) ? Response.error(SAME_AS_OLD_PASSWORD_ERROR_MESSAGE_ARABIC) : Response.error(SAME_AS_OLD_PASSWORD_ERROR_MESSAGE);
+            return lang.equals(LanguageType.ARB) ? Response.error(SAME_AS_OLD_PASSWORD_ERROR_MESSAGE_ARABIC)
+                    : Response.error(SAME_AS_OLD_PASSWORD_ERROR_MESSAGE);
         }
 
         try {
@@ -262,10 +288,13 @@ public class CustomerServiceImpl implements CustomerService {
                     .email(customer.getEmail())
                     .build();
 
-            return lang.equals(LanguageType.ARB) ? Response.success(PASSWORD_UPDATE_SUCCESS_MESSAGE_ARABIC, loginResponse) : Response.success(PASSWORD_UPDATE_SUCCESS_MESSAGE, loginResponse);
+            return lang.equals(LanguageType.ARB)
+                    ? Response.success(PASSWORD_UPDATE_SUCCESS_MESSAGE_ARABIC, loginResponse)
+                    : Response.success(PASSWORD_UPDATE_SUCCESS_MESSAGE, loginResponse);
         } catch (Exception e) {
             log.error("Exception occurred during password update", e);
-            return lang.equals(LanguageType.ARB) ? Response.error(PASSWORD_UPDATE_FAILURE_MESSAGE_ARABIC) : Response.error(PASSWORD_UPDATE_FAILURE_MESSAGE);
+            return lang.equals(LanguageType.ARB) ? Response.error(PASSWORD_UPDATE_FAILURE_MESSAGE_ARABIC)
+                    : Response.error(PASSWORD_UPDATE_FAILURE_MESSAGE);
         }
     }
 }
