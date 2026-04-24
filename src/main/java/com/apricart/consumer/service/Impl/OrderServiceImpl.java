@@ -130,7 +130,7 @@ public class OrderServiceImpl implements OrderService {
             addPendingOrder(orders);
             saveOrderItems(orders, lang);
             updateOrderItemsQuantity(orders, lang);
-            // sendOrderEmail(orders, lang);
+            sendOrderEmail(orders, lang);
 
             return Orders.toDTO(orders, orderMapper, lang);
 
