@@ -79,8 +79,17 @@ public class CustomerAddressServiceImpl implements CustomerAddressService {
             customerAddress = findById(customerAddressRequestDTO.getId(), lang);
             customerAddressRequestDTO.setCreateDateTime(customerAddress.getCreateDateTime());
         }
+        
+        Long cityId = customerAddressRequestDTO.getCityId();
+        if (cityId == null) {
+            List<com.apricart.consumer.enity.City> cities = cityService.getAllCities();
+            if (!cities.isEmpty()) {
+                cityId = cities.get(0).getId();
+            }
+        }
+        
         customerAddress = CustomerAddress.fromDTO(customerAddressRequestDTO);
-        customerAddress.setCity(cityService.findById(customerAddressRequestDTO.getCityId(), lang));
+        customerAddress.setCity(cityService.findById(cityId, lang));
         customerAddress.setCustomer(customer);
         save(customerAddress);
     }
