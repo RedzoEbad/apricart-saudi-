@@ -12,6 +12,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,6 +32,7 @@ public class OrderOpenController{
     @Autowired
     private CustomerService customerService;
 
+    @Transactional(readOnly = true)
     @ApiOperation(value = "Get orders History by customer")
     @GetMapping("/customer/history")
     public ResponseEntity<GenericResponse<List<OrderResponseDTO>>> getOrdersByCustomerId(@RequestParam("customerId") Long id, @RequestHeader("Language") LanguageType lang) {

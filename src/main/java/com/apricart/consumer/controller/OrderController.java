@@ -19,6 +19,7 @@ import io.swagger.annotations.Authorization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -43,6 +44,7 @@ public class OrderController{
     @Autowired
     private OrderMapper orderMapper;
 
+    @Transactional(readOnly = true)
     @ApiOperation(value = "Get Order by Id", authorizations = { @Authorization(value="jwtToken") })
     @GetMapping("/{id}")
     public ResponseEntity<GenericResponse<OrderResponseDTO>> findOrderById(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
@@ -63,6 +65,7 @@ public class OrderController{
         return Response.created(order);
     }
 
+    @Transactional(readOnly = true)
     @ApiOperation(value = "Get orders History by customer", authorizations = { @Authorization(value="jwtToken") })
     @GetMapping("/history")
     public ResponseEntity<GenericResponse<List<OrderResponseDTO>>> getOrdersByCustomer(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
@@ -100,6 +103,7 @@ public class OrderController{
         Orders updatedOrders = orderService.updateOrderStatus(id, status, lang);
         return updatedOrders != null ? Response.success(Orders.toDTO(updatedOrders, orderMapper, lang)) : Response.notFound();
     }
+    @Transactional(readOnly = true)
     @ApiOperation(value = "Get all orders", authorizations = { @Authorization(value="jwtToken") })
     @GetMapping
     public ResponseEntity<GenericResponse<List<OrderResponseDTO>>> getAllOrder(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
@@ -108,6 +112,7 @@ public class OrderController{
         return !orders.isEmpty() ? Response.success(orders) : Response.notFound();
     }
 
+    @Transactional(readOnly = true)
     @ApiOperation(value = "Get orders by order type", authorizations = { @Authorization(value="jwtToken") })
     @GetMapping("/type/{orderType}")
     public ResponseEntity<GenericResponse<List<OrderResponseDTO>>> getOrdersByOrderType(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
@@ -117,6 +122,7 @@ public class OrderController{
         return !orders.isEmpty() ? Response.success(orders) : Response.notFound();
     }
 
+    @Transactional(readOnly = true)
     @ApiOperation(value = "Get orders by payment status", authorizations = { @Authorization(value="jwtToken") })
     @GetMapping("/status/{paymentType}")
     public ResponseEntity<GenericResponse<List<OrderResponseDTO>>> getOrdersByPaymentType(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
@@ -126,6 +132,7 @@ public class OrderController{
         return !orders.isEmpty() ? Response.success(orders) : Response.notFound();
     }
 
+    @Transactional(readOnly = true)
     @ApiOperation(value = "Get orders by payment mode", authorizations = { @Authorization(value="jwtToken") })
     @GetMapping("/payment/{paymentMode}")
     public ResponseEntity<GenericResponse<List<OrderResponseDTO>>> getOrdersByPaymentMode(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
@@ -135,6 +142,7 @@ public class OrderController{
         return !orders.isEmpty() ? Response.success(orders) : Response.notFound();
     }
 
+    @Transactional(readOnly = true)
     @ApiOperation(value = "Get orders by shipping charges", authorizations = { @Authorization(value="jwtToken") })
     @GetMapping("/shipping/{shippingCharges}")
     public ResponseEntity<GenericResponse<List<OrderResponseDTO>>> getOrdersByPaymentMode(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,

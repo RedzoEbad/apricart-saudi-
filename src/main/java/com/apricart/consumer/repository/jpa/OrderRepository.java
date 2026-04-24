@@ -13,10 +13,15 @@ import java.util.List;
 public interface OrderRepository extends JpaRepository<Orders, String> {
 
     List<Orders> findByCustomer(Customer customer);
+
     List<Orders> findByPaymentMode(PaymentModeType paymentModeType);
+
     List<Orders> findByPaymentStatus(PaymentStatusType paymentStatusType);
+
     List<Orders> findByOrderStatus(OrderType orderType);
+
     List<Orders> findByShippingCharge(String shippingCharge);
+
     Boolean existsByCustomerAddress(CustomerAddress customer);
 
 }
