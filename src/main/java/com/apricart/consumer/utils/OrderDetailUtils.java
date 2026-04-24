@@ -92,11 +92,23 @@ public class OrderDetailUtils {
 
 
     double getDeliveryCharges(long warehouseId) {
-        return Double.parseDouble(optionService.findByKey(DELIVERY_CHARGES_KEY + warehouseId).getValue());
+        String key = DELIVERY_CHARGES_KEY + warehouseId;
+        com.apricart.consumer.enity.Option option = optionService.findByKey(key);
+        if (option == null) {
+            LOGGER.error("CRITICAL ERROR: Missing configuration key in 'option' table: {}", key);
+            throw new OrderException("Missing configuration key: " + key);
+        }
+        return Double.parseDouble(option.getValue());
     }
 
     double getMinOrderValue(long warehouseId) {
-        return Double.parseDouble(optionService.findByKey(MIN_ORDER_VALUE_KEY + warehouseId).getValue());
+        String key = MIN_ORDER_VALUE_KEY + warehouseId;
+        com.apricart.consumer.enity.Option option = optionService.findByKey(key);
+        if (option == null) {
+            LOGGER.error("CRITICAL ERROR: Missing configuration key in 'option' table: {}", key);
+            throw new OrderException("Missing configuration key: " + key);
+        }
+        return Double.parseDouble(option.getValue());
     }
 
     double calculateSubtotal(Orders orders) {
