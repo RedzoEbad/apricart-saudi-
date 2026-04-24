@@ -130,13 +130,13 @@ public class OrderServiceImpl implements OrderService {
             addPendingOrder(orders);
             saveOrderItems(orders, lang);
             updateOrderItemsQuantity(orders, lang);
-            sendOrderEmail(orders, lang);
+            // sendOrderEmail(orders, lang);
 
             return Orders.toDTO(orders, orderMapper, lang);
 
         } catch (Exception e) {
-            LOGGER.error("Error adding order : {}", e.getMessage());
-            throw new OrderException(e.getMessage());
+            LOGGER.error("CRITICAL ORDER ERROR: {}", e.getMessage(), e);
+            throw new OrderException("Order failed because: " + e.getMessage());
         }
     }
 
