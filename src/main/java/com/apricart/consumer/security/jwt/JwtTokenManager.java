@@ -19,10 +19,10 @@ import java.util.Date;
 public class JwtTokenManager {
 
 	public String generateToken(Customer user) {
+		return generateToken(user.getUsername(), user.getUserRole());
+	}
 
-		final String username = user.getUsername();
-		final UserRole userRole = user.getUserRole();
-
+	public String generateToken(String username, UserRole userRole) {
 		final Claims claims = Jwts.claims().setSubject(username);
 		claims.put("role", userRole.name());
 

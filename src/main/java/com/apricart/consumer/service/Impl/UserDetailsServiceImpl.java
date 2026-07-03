@@ -3,6 +3,7 @@ package com.apricart.consumer.service.Impl;
 import com.apricart.consumer.security.enums.UserRole;
 import com.apricart.consumer.security.dto.dto.AuthenticatedUserDto;
 import com.apricart.consumer.service.CustomerService;
+import com.apricart.consumer.service.UserPortalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -28,11 +29,25 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	private static final String USERNAME_OR_PASSWORD_INVALID = "Invalid username or password.";
 
 	private final CustomerService customerService;
+	private final UserPortalService userPortalService;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) {
 
-		final AuthenticatedUserDto authenticatedUser = customerService.findAuthenticatedUserByUsername(username);
+		AuthenticatedUserDto authenticatedUser = null;
+		try {
+			authenticatedUser = customerService.findAuthenticatedUserByUsername(username);
+		} catch (Exception e) {
+			log.debug("User not found in Customer service for username: {}", username);
+		}
+
+		if (Objects.isNull(authenticatedUser)) {
+			try {
+				authenticatedUser = userPortalService.findAuthenticatedUserByUsername(username);
+			} catch (Exception e) {
+				log.debug("User not found in UserPortal service for username: {}", username);
+			}
+		}
 
 		if (Objects.isNull(authenticatedUser)) {
 			throw new UsernameNotFoundException(USERNAME_OR_PASSWORD_INVALID);

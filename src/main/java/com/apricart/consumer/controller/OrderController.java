@@ -19,6 +19,7 @@ import io.swagger.annotations.Authorization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -94,6 +95,7 @@ public class OrderController{
         return lang.equals(LanguageType.ARB) ? Response.success(ORDER_REMOVED_SUCCESSFULLY_ARABIC) : Response.success(ORDER_REMOVED_SUCCESSFULLY);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @ApiOperation(value = "Update Order Status By Id", authorizations = { @Authorization(value="jwtToken") })
     @PutMapping("/{id}")
     public ResponseEntity<GenericResponse<OrderResponseDTO>> updateOrderStatusById(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
@@ -103,6 +105,7 @@ public class OrderController{
         Orders updatedOrders = orderService.updateOrderStatus(id, status, lang);
         return updatedOrders != null ? Response.success(Orders.toDTO(updatedOrders, orderMapper, lang)) : Response.notFound();
     }
+    @PreAuthorize("hasAuthority('ADMIN')")
     @Transactional(readOnly = true)
     @ApiOperation(value = "Get all orders", authorizations = { @Authorization(value="jwtToken") })
     @GetMapping
@@ -112,6 +115,7 @@ public class OrderController{
         return !orders.isEmpty() ? Response.success(orders) : Response.notFound();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @Transactional(readOnly = true)
     @ApiOperation(value = "Get orders by order type", authorizations = { @Authorization(value="jwtToken") })
     @GetMapping("/type/{orderType}")
@@ -122,6 +126,7 @@ public class OrderController{
         return !orders.isEmpty() ? Response.success(orders) : Response.notFound();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @Transactional(readOnly = true)
     @ApiOperation(value = "Get orders by payment status", authorizations = { @Authorization(value="jwtToken") })
     @GetMapping("/status/{paymentType}")
@@ -132,6 +137,7 @@ public class OrderController{
         return !orders.isEmpty() ? Response.success(orders) : Response.notFound();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @Transactional(readOnly = true)
     @ApiOperation(value = "Get orders by payment mode", authorizations = { @Authorization(value="jwtToken") })
     @GetMapping("/payment/{paymentMode}")
@@ -142,6 +148,7 @@ public class OrderController{
         return !orders.isEmpty() ? Response.success(orders) : Response.notFound();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @Transactional(readOnly = true)
     @ApiOperation(value = "Get orders by shipping charges", authorizations = { @Authorization(value="jwtToken") })
     @GetMapping("/shipping/{shippingCharges}")
@@ -153,6 +160,7 @@ public class OrderController{
     }
 
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @ApiOperation(value = "Update Payment Status By Id", authorizations = { @Authorization(value="jwtToken") })
     @PutMapping("/payment/{id}/{status}")
     public ResponseEntity<GenericResponse<OrderResponseDTO>> updatePaymentStatusById(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
