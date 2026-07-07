@@ -6,6 +6,7 @@ import com.apricart.consumer.generic.GenericResponse;
 import com.apricart.consumer.generic.Response;
 import com.apricart.consumer.mapper.OrderMapper;
 import com.apricart.consumer.security.dto.request.OrderRequestDTO;
+import com.apricart.consumer.security.dto.response.OrderMinResponseDTO;
 import com.apricart.consumer.security.dto.response.OrderResponseDTO;
 import com.apricart.consumer.security.enums.LanguageType;
 import com.apricart.consumer.security.enums.OrderType;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.apricart.consumer.security.constants.ArabicResponseMessages.ORDER_REMOVED_SUCCESSFULLY_ARABIC;
 import static com.apricart.consumer.security.constants.ResponseMessage.ORDER_REMOVED_SUCCESSFULLY;
@@ -44,6 +46,18 @@ public class OrderController{
 
     @Autowired
     private OrderMapper orderMapper;
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Transactional(readOnly = true)
+    @ApiOperation(value = "Get detailed order by Id for admin", authorizations = { @Authorization(value="jwtToken") })
+    @GetMapping("/detail")
+    public ResponseEntity<GenericResponse<OrderResponseDTO>> getOrderDetail(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
+            @RequestHeader("Language") LanguageType lang,
+            @RequestParam String id) {
+        OrderResponseDTO orders = Orders.toDTO(orderService.findById(id, lang), orderMapper, lang);
+        return orders != null ? Response.success(orders) : Response.notFound();
+    }
 
     @Transactional(readOnly = true)
     @ApiOperation(value = "Get Order by Id", authorizations = { @Authorization(value="jwtToken") })
@@ -109,9 +123,15 @@ public class OrderController{
     @Transactional(readOnly = true)
     @ApiOperation(value = "Get all orders", authorizations = { @Authorization(value="jwtToken") })
     @GetMapping
-    public ResponseEntity<GenericResponse<List<OrderResponseDTO>>> getAllOrder(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
-                                                                               @RequestHeader("Language") LanguageType lang) {
-        List<OrderResponseDTO> orders = Orders.toDTOList(orderService.getAllOrders(), orderMapper, lang);
+    public ResponseEntity<GenericResponse<List<OrderMinResponseDTO>>> getAllOrder(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
+            @RequestHeader("Language") LanguageType lang,
+            @RequestParam(defaultValue = "0", required = false) int pageNo,
+            @RequestParam(defaultValue = "10", required = false) int pageSize) {
+        List<Orders> ordersList = orderService.getAllOrders(pageNo, pageSize);
+        List<OrderMinResponseDTO> orders = ordersList.stream()
+                .map(Orders::toMinDTO)
+                .collect(Collectors.toList());
         return !orders.isEmpty() ? Response.success(orders) : Response.notFound();
     }
 

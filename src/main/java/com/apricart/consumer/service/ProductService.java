@@ -32,4 +32,5 @@ public interface ProductService {
     Product updateProductPosition(Long id, Integer position, LanguageType languageType);
     String getProductImage(Long id, LanguageType languageType);
     ResponseEntity<?> addOrUpdateProductImage(Long productId, MultipartFile image, LanguageType lang);
+    List<Product> findOrderedProducts(int page, int size);
 }

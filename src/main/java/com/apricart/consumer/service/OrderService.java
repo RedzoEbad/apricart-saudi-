@@ -16,6 +16,7 @@ import java.util.List;
 
 public interface OrderService {
     List<Orders> getAllOrders();
+    List<Orders> getAllOrders(int page, int size);
 
     Orders findById(String id, LanguageType languageType);
     List<Orders> findByCustomer(Customer customer);

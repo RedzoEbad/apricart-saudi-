@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -167,6 +168,19 @@ public class ProductController {
         return !products.isEmpty() ? Response.success(products) : Response.notFound();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @ApiOperation(value = "Get all ordered products", authorizations = { @Authorization(value = "jwtToken") })
+    @GetMapping("/ordered")
+    public ResponseEntity<GenericResponse<List<ProductResponseDTO>>> getOrderedProducts(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
+            @RequestHeader("Language") LanguageType lang,
+            @RequestParam(defaultValue = "0", required = false) int pageNo,
+            @RequestParam(defaultValue = "10", required = false) int pageSize) {
+        List<ProductResponseDTO> products = Product.toDTOList(productService.findOrderedProducts(pageNo, pageSize));
+        return !products.isEmpty() ? Response.success(products) : Response.notFound();
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
     @ApiOperation(value = "Get product by Id", authorizations = { @Authorization(value = "jwtToken") })
     @GetMapping("/{id}")
     public ResponseEntity<GenericResponse<ProductResponseDTO>> findProductById(
@@ -176,6 +190,7 @@ public class ProductController {
         return product != null ? Response.success(Product.toDTO(product)) : Response.notFound();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @ApiOperation(value = "Get product by SKU", authorizations = { @Authorization(value = "jwtToken") })
     @GetMapping("/sku/{sku}")
     public ResponseEntity<GenericResponse<ProductResponseDTO>> findProductBySKU(
@@ -185,6 +200,7 @@ public class ProductController {
         return product != null ? Response.success(Product.toDTO(product)) : Response.notFound();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @ApiOperation(value = "Add Product", authorizations = { @Authorization(value = "jwtToken") })
     @PostMapping
     public ResponseEntity<GenericResponse<ProductResponseDTO>> addProduct(
@@ -194,6 +210,7 @@ public class ProductController {
         return Response.created();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @ApiOperation(value = "Update Product", authorizations = { @Authorization(value = "jwtToken") })
     @PutMapping
     public ResponseEntity<GenericResponse<ProductResponseDTO>> updateProduct(
@@ -203,6 +220,7 @@ public class ProductController {
         return updatedProduct != null ? Response.success(Product.toDTO(updatedProduct)) : Response.notFound();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @ApiOperation(value = "Update Product Position By Id", authorizations = { @Authorization(value = "jwtToken") })
     @PutMapping("/{id}/{position}")
     public ResponseEntity<GenericResponse<ProductResponseDTO>> updateProductPositionById(
@@ -213,6 +231,7 @@ public class ProductController {
                 : Response.notFound();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @ApiOperation(value = "Update Product Status By Id", authorizations = { @Authorization(value = "jwtToken") })
     @PutMapping("/status/{id}/{status}")
     public ResponseEntity<GenericResponse<ProductResponseDTO>> updateProductStatusById(
@@ -222,6 +241,7 @@ public class ProductController {
         return updateProductStatus != null ? Response.success(Product.toDTO(updateProductStatus)) : Response.notFound();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @ApiOperation(value = "Delete Product By Id", authorizations = { @Authorization(value = "jwtToken") })
     @DeleteMapping("/{id}")
     public ResponseEntity<GenericResponse<String>> deleteCategory(
@@ -232,6 +252,7 @@ public class ProductController {
                 : Response.success(PRODUCT_REMOVED_SUCCESSFULLY);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @ApiOperation(value = "Product Image Update By Id", authorizations = { @Authorization(value = "jwtToken") })
     @PostMapping("/image/update/{id}")
     public ResponseEntity<?> updateProductImage(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,

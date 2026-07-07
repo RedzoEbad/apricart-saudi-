@@ -23,6 +23,7 @@ import com.google.protobuf.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,6 +66,13 @@ public class OrderServiceImpl implements OrderService {
     public List<Orders> getAllOrders() {
         LOGGER.info("Getting all orders");
         return orderRepository.findAll();
+    }
+
+    @Override
+    public List<Orders> getAllOrders(int page, int size) {
+        LOGGER.info("Getting paginated orders");
+        PageRequest pageRequest = PageRequest.of(page, size);
+        return orderRepository.findAll(pageRequest).getContent();
     }
 
     @Override

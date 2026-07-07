@@ -2,6 +2,7 @@ package com.apricart.consumer.enity;
 
 import com.apricart.consumer.mapper.OrderMapper;
 import com.apricart.consumer.security.dto.request.OrderRequestDTO;
+import com.apricart.consumer.security.dto.response.OrderMinResponseDTO;
 import com.apricart.consumer.security.dto.response.OrderResponseDTO;
 import com.apricart.consumer.security.enums.*;
 import lombok.*;
@@ -95,6 +96,21 @@ public class Orders extends BaseEntity {
 
     @OneToMany(mappedBy = "orders")
     private List<OrderItem> orderItems;
+
+    public static OrderMinResponseDTO toMinDTO(Orders orders) {
+        return OrderMinResponseDTO.builder()
+                .id(orders.getId())
+                .customerId(orders.getCustomer() != null ? orders.getCustomer().getId() : null)
+                .warehouseId(orders.getWarehouseId())
+                .grandTotal(orders.getGrandTotal())
+                .paymentMode(orders.getPaymentMode())
+                .paymentStatus(orders.getPaymentStatus())
+                .orderStatus(orders.getOrderStatus())
+                .arabicOrderStatus(orders.getOrderTypeArabic())
+                .deliveryDate(orders.getDeliveryDate())
+                .deliveryTime(orders.getDeliveryTime())
+                .build();
+    }
 
     public static OrderResponseDTO toDTO(Orders orders, OrderMapper orderMapper, LanguageType languageType) {
         return OrderResponseDTO.builder()

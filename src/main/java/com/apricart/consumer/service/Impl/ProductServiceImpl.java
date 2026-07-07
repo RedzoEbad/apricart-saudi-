@@ -314,4 +314,10 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    @Override
+    public List<Product> findOrderedProducts(int page, int size) {
+        LOGGER.info("Finding ordered products");
+        PageRequest pageRequest = PageRequest.of(page, size);
+        return productRepository.findOrderedProducts(pageRequest).getContent();
+    }
 }

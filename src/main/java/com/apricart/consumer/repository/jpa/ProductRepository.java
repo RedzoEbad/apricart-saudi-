@@ -7,6 +7,7 @@ import com.apricart.consumer.enity.SubCategory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
@@ -17,4 +18,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Product findProductBySku(String sku);
     Page<Product> findProductByIsDiscounted(Boolean isDiscounted, Pageable pageable);
     Long findTopByOrderByIdDesc();
+
+    @Query("SELECT DISTINCT pw.product FROM OrderItem oi JOIN oi.productWarehouse pw")
+    Page<Product> findOrderedProducts(Pageable pageable);
 }
