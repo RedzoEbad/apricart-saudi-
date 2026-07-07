@@ -75,4 +75,18 @@ public class AuthenticationController {
 			@RequestHeader("Language") LanguageType lang) throws Exception {
 		return userPortalService.getPortalLoginResponse(loginRequest, lang);
 	}
+
+	@ApiOperation(value = "Admin Signup")
+	@PostMapping("/open/admin/signup")
+	public ResponseEntity<?> portalSignupRequest(@Valid @RequestBody AdminSignupRequest signupRequest,
+			@RequestHeader("Language") LanguageType lang) throws Exception {
+		return userPortalService.getPortalSignupResponse(signupRequest, lang);
+	}
+
+	@ApiOperation(value = "Admin OTP Verification")
+	@PostMapping("/open/admin/verify")
+	public ResponseEntity<?> portalVerifyRequest(@Valid @RequestBody OtpVerifyEmailRequest verifyRequest,
+			@RequestHeader("Language") LanguageType lang) throws Exception {
+		return userPortalService.getPortalVerifyResponse(verifyRequest, lang);
+	}
 }
