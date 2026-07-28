@@ -16,6 +16,9 @@ public class SettingResponseDTO {
     private String privacyPolicy;
     private String privacyPolicyArabic;
 
+    private String termsAndConditions;
+    private String termsAndConditionsArabic;
+
     private String splashScreen;
 
     private String appName;

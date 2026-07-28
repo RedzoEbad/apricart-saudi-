@@ -1,11 +1,26 @@
-version: '3.1'
-
 services:
-  db:
-    container_name: db_postgres
-    image: postgres
-    restart: always
+  apricart:
+    build: .
+    image: apricart-api:latest
+    container_name: apricart_api
+    restart: unless-stopped
     ports:
-      - 5432:5432
+      - "8081:8081"
+    env_file:
+      - .env
     environment:
-      POSTGRES_PASSWORD: example
+      SERVER_PORT: 8081
+    volumes:
+      - ./logs:/app/logs
+      - ./google:/app/google:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"

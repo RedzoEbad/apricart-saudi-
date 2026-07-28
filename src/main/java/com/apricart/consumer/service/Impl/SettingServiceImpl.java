@@ -81,6 +81,9 @@ public class SettingServiceImpl implements SettingService {
         existingSetting.setPAKNumber(settingRequestDTO.getPAKNumber() == null ? existingSetting.getPAKNumber() : settingRequestDTO.getPAKNumber());
         existingSetting.setUAENumber(settingRequestDTO.getUAENumber() == null ? existingSetting.getUAENumber() : settingRequestDTO.getUAENumber());
         existingSetting.setPrivacyPolicy(settingRequestDTO.getPrivacyPolicy() == null ? existingSetting.getPrivacyPolicy() : settingRequestDTO.getPrivacyPolicy());
+        existingSetting.setPrivacyPolicyArabic(settingRequestDTO.getPrivacyPolicyArabic() == null ? existingSetting.getPrivacyPolicyArabic() : settingRequestDTO.getPrivacyPolicyArabic());
+        existingSetting.setTermsAndConditions(settingRequestDTO.getTermsAndConditions() == null ? existingSetting.getTermsAndConditions() : settingRequestDTO.getTermsAndConditions());
+        existingSetting.setTermsAndConditionsArabic(settingRequestDTO.getTermsAndConditionsArabic() == null ? existingSetting.getTermsAndConditionsArabic() : settingRequestDTO.getTermsAndConditionsArabic());
         existingSetting.setTwitterURL(settingRequestDTO.getTwitterURL() == null ? existingSetting.getTwitterURL() : settingRequestDTO.getTwitterURL());
         existingSetting.setMinOrderValue(settingRequestDTO.getMinOrderValue() == null ? existingSetting.getMinOrderValue() : settingRequestDTO.getMinOrderValue());
         existingSetting.setSplashScreen(settingRequestDTO.getSplashScreen() == null ? existingSetting.getSplashScreen() : settingRequestDTO.getSplashScreen());

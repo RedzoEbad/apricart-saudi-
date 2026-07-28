@@ -21,11 +21,17 @@ public class Setting extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String privacyPolicy;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String privacyPolicyArabic;
+
+    @Column(columnDefinition = "TEXT")
+    private String termsAndConditions;
+
+    @Column(columnDefinition = "TEXT")
+    private String termsAndConditionsArabic;
 
     @Column
     private String splashScreen;
@@ -90,6 +96,8 @@ public class Setting extends BaseEntity {
                 .warehouseId(setting.getWarehouseId())
                 .privacyPolicy(setting.getPrivacyPolicy())
                 .privacyPolicyArabic(setting.getPrivacyPolicyArabic())
+                .termsAndConditions(setting.getTermsAndConditions())
+                .termsAndConditionsArabic(setting.getTermsAndConditionsArabic())
                 .splashScreen(setting.getSplashScreen())
                 .appName(setting.getAppName())
                 .appVersion(setting.getAppVersion())
@@ -121,6 +129,9 @@ public class Setting extends BaseEntity {
         return Setting.builder()
                 .warehouseId(dto.getWarehouseId())
                 .privacyPolicy(dto.getPrivacyPolicy())
+                .privacyPolicyArabic(dto.getPrivacyPolicyArabic())
+                .termsAndConditions(dto.getTermsAndConditions())
+                .termsAndConditionsArabic(dto.getTermsAndConditionsArabic())
                 .splashScreen(dto.getSplashScreen())
                 .appName(dto.getAppName())
                 .appVersion(dto.getAppVersion())

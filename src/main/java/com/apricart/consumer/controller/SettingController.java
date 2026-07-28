@@ -34,6 +34,7 @@ public class SettingController {
     @Autowired
     private FAQService faqService;
 
+    @Transactional
     @ApiOperation(value = "Get all settings")
     @GetMapping
     public ResponseEntity<GenericResponse<List<SettingResponseDTO>>> getAllSettings(
@@ -42,6 +43,7 @@ public class SettingController {
         return !settings.isEmpty() ? Response.success(settings) : Response.notFound();
     }
 
+    @Transactional
     @ApiOperation(value = "Get setting by Id")
     @GetMapping("/{id}")
     public ResponseEntity<GenericResponse<SettingResponseDTO>> findSettingById(@PathVariable Long id,
