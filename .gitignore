@@ -11,6 +11,7 @@ RSA/
 *.rar
 *.bak
 apricart-backup.git/
+*.postman_collection.json
 
 # Logs and large output files
 nohup.out
