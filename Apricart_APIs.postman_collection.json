@@ -1,0 +1,1016 @@
+{
+  "info": {
+    "_postman_id": "apricart-saudi-api-collection",
+    "name": "Apricart Saudi Backend API",
+    "description": "Postman collection for Apricart Saudi Backend APIs (Banners, Categories, SubCategories, Products, Auth, Settings)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://185.164.25.196:8081",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "YOUR_ADMIN_JWT_TOKEN",
+      "type": "string"
+    },
+    {
+      "key": "category_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "subcategory_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "product_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "banner_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "warehouse_id",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Admin Signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@apricart.com\",\n  \"password\": \"adminpassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/open/admin/signup",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "open",
+                "admin",
+                "signup"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin Verify OTP & Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@apricart.com\",\n  \"otp\": \"1234\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/open/admin/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "open",
+                "admin",
+                "verify"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Banners",
+      "item": [
+        {
+          "name": "Add Banner",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Summer Promotion Banner\",\n  \"arabicName\": \"بنر عروض الصيف\",\n  \"status\": true,\n  \"level\": \"ONE\",\n  \"position\": \"TOP\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/open/banners",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "open",
+                "banners"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload Banner Image",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/open/banners/image/update/{{banner_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "open",
+                "banners",
+                "image",
+                "update",
+                "{{banner_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Banners",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/open/banners",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "open",
+                "banners"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Banner By Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/open/banners/{{banner_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "open",
+                "banners",
+                "{{banner_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Active Banners",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/open/banners/active",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "open",
+                "banners",
+                "active"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Banner",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/open/banners/{{banner_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "open",
+                "banners",
+                "{{banner_id}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Add Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dairy & Milk\",\n  \"arabicName\": \"الألبان والحليب\",\n  \"level\": \"ONE\",\n  \"position\": 1,\n  \"status\": true,\n  \"isDiscountedCategory\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "categories"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload Category Image",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/categories/image/update/{{category_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "categories",
+                "image",
+                "update",
+                "{{category_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "categories"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Category By Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/categories/{{category_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "categories",
+                "{{category_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Active Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/categories/active",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "categories",
+                "active"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/categories/{{category_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "categories",
+                "{{category_id}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "SubCategories",
+      "item": [
+        {
+          "name": "Add SubCategory",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Fresh Milk\",\n  \"arabicName\": \"حليب طازج\",\n  \"categoryId\": 1,\n  \"level\": \"ONE\",\n  \"position\": 1,\n  \"status\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/subcategories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "subcategories"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload SubCategory Image",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/subcategories/image/update/{{subcategory_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "subcategories",
+                "image",
+                "update",
+                "{{subcategory_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All SubCategories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/subcategories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "subcategories"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get SubCategories By Category ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/subcategories/category/{{category_id}}?warehouseId={{warehouse_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "subcategories",
+                "category",
+                "{{category_id}}"
+              ],
+              "query": [
+                {
+                  "key": "warehouseId",
+                  "value": "{{warehouse_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete SubCategory",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/subcategories/{{subcategory_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "subcategories",
+                "{{subcategory_id}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Add Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Almarai Full Cream Milk 1L\",\n  \"arabicTitle\": \"حليب المراعي كامل الدسم 1 لتر\",\n  \"description\": \"Fresh full cream milk 1 liter\",\n  \"arabicDescription\": \"حليب طازج كامل الدسم سعة 1 لتر\",\n  \"sku\": \"ALM-MILK-1L\",\n  \"weight\": \"1L\",\n  \"categoryId\": 1,\n  \"subCategoryId\": 1,\n  \"brandId\": 1,\n  \"position\": 1,\n  \"isActive\": true,\n  \"isFeatured\": true,\n  \"isTrending\": false,\n  \"isDiscounted\": false,\n  \"isNewArrivals\": true,\n  \"isRecommended\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "products"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload Product Image",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/products/image/update/{{product_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "products",
+                "image",
+                "update",
+                "{{product_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/products?pageNo=0&pageSize=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "pageNo",
+                  "value": "0"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product By Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/products/{{product_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "products",
+                "{{product_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Products By Category ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/products/category/{{category_id}}?pageNo=0&pageSize=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "products",
+                "category",
+                "{{category_id}}"
+              ],
+              "query": [
+                {
+                  "key": "pageNo",
+                  "value": "0"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Products By SubCategory ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/products/subcategory/{{subcategory_id}}?pageNo=0&pageSize=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "products",
+                "subcategory",
+                "{{subcategory_id}}"
+              ],
+              "query": [
+                {
+                  "key": "pageNo",
+                  "value": "0"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Featured Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/products/featured?pageNo=0&pageSize=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "products",
+                "featured"
+              ],
+              "query": [
+                {
+                  "key": "pageNo",
+                  "value": "0"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Trending Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/products/trending?pageNo=0&pageSize=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "products",
+                "trending"
+              ],
+              "query": [
+                {
+                  "key": "pageNo",
+                  "value": "0"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/products/{{product_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "products",
+                "{{product_id}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "item": [
+        {
+          "name": "Get All Settings (Privacy Policy & Terms)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/open/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "open",
+                "settings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Language",
+                "value": "ENG"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"appName\": \"Apricart\",\n  \"privacyPolicy\": \"Updated Privacy Policy...\",\n  \"privacyPolicyArabic\": \"تحديث سياسة الخصوصية...\",\n  \"termsAndConditions\": \"Updated Terms and Conditions...\",\n  \"termsAndConditionsArabic\": \"تحديث الشروط والأحكام...\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/open/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "open",
+                "settings"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
