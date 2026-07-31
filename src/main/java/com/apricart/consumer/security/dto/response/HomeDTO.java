@@ -14,6 +14,7 @@ public class HomeDTO {
     private List<ProductDetailDTO> newArrivals;
     private List<ProductDetailDTO> trending;
     private List<ProductDetailDTO> recommended;
-
+    private List<BrandResponseDTO> brands;
+    private List<BannerResponseDTO> banners;
 
 }
