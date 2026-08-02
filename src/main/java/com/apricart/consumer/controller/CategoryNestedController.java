@@ -41,9 +41,13 @@ public class CategoryNestedController {
     @ApiOperation(value = "Get All Categories, SubCategories, and Products in ONE single nested tree API response")
     @GetMapping
     public ResponseEntity<GenericResponse<List<CategoryResponseDTO>>> getAllNestedCategories(
-            @RequestParam("warehouseId") Long warehouseId,
+            @RequestParam(value = "warehouseId", required = false, defaultValue = "1") Long warehouseId,
             @RequestParam(required = false) Long customerId,
-            @RequestHeader("Language") LanguageType lang) {
+            @RequestHeader(value = "Language", required = false) LanguageType lang) {
+
+        if (lang == null) {
+            lang = LanguageType.ENG;
+        }
 
         String cacheKey = warehouseId + "_" + lang + "_" + (customerId != null ? customerId : 0);
         if (NESTED_CACHE.containsKey(cacheKey)) {
