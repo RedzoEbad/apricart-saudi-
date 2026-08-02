@@ -66,24 +66,31 @@ public class CategoryOpenController {
             @RequestHeader("Language") LanguageType lang) {
 
         List<SubCategoryResponseDTO> subCategories = SubCategory.toDTOList(subCategoryService.findByCategoryId(id, lang, warehouseId));
-        List<ProductDetailDTO> products = Collections.emptyList();
+        List<ProductDetailDTO> firstSubCatProducts = Collections.emptyList();
 
-        if (subCategories != null && !subCategories.isEmpty() && subCategories.get(0).getId() != null) {
-            Long firstSubCategoryId = subCategories.get(0).getId();
-            try {
-                ResponseEntity<GenericResponse<List<ProductDetailDTO>>> response = productControllerUtil.getProductsBySubCategory(
-                        lang, warehouseId, customerId, firstSubCategoryId, pageNo, pageSize);
-                if (response != null && response.getBody() != null && response.getBody().getData() != null) {
-                    products = response.getBody().getData();
+        if (subCategories != null && !subCategories.isEmpty()) {
+            for (SubCategoryResponseDTO subCat : subCategories) {
+                try {
+                    ResponseEntity<GenericResponse<List<ProductDetailDTO>>> response = productControllerUtil.getProductsBySubCategory(
+                            lang, warehouseId, customerId, subCat.getId(), pageNo, pageSize);
+                    if (response != null && response.getBody() != null && response.getBody().getData() != null) {
+                        subCat.setProducts(response.getBody().getData());
+                    } else {
+                        subCat.setProducts(Collections.emptyList());
+                    }
+                } catch (Exception e) {
+                    LOGGER.warn("Failed to fetch products for subcategory {}: {}", subCat.getId(), e.getMessage());
+                    subCat.setProducts(Collections.emptyList());
                 }
-            } catch (Exception e) {
-                LOGGER.warn("Failed to fetch initial products for category details endpoint: {}", e.getMessage());
+            }
+            if (subCategories.get(0).getProducts() != null) {
+                firstSubCatProducts = subCategories.get(0).getProducts();
             }
         }
 
         CategoryDetailsDTO detailsDTO = CategoryDetailsDTO.builder()
                 .subCategories(subCategories)
-                .products(products)
+                .products(firstSubCatProducts)
                 .build();
 
         return Response.success(detailsDTO);
