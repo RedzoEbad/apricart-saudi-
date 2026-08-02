@@ -91,34 +91,42 @@ public class CategoryOpenController {
     }
 
     @ApiOperation(value = "Get Categories by Warehouse Id")
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public ResponseEntity<GenericResponse<List<CategoryResponseDTO>>> findCategoryByWarehouseId(
             @PathVariable Long id,
-            @RequestHeader("Language") LanguageType lang) {
+            @RequestHeader(value = "Language", required = false) LanguageType lang) {
+        if (lang == null) {
+            lang = LanguageType.ENG;
+        }
         List<CategoryResponseDTO> categories = categoryService.getCategoriesByWarehouseId(id);
         return !categories.isEmpty() ? Response.success(categories) : Response.notFound();
     }
 
     @ApiOperation(value = "Get Sub Categories by Category Id")
-    @GetMapping("/{id}/subcategories")
+    @GetMapping("/{id:\\d+}/subcategories")
     public ResponseEntity<GenericResponse<List<SubCategoryResponseDTO>>> findSubCategoryByCategoryId(
             @PathVariable Long id,
             @RequestParam("warehouseId") Long warehouseId,
-            @RequestHeader("Language") LanguageType lang) {
-
+            @RequestHeader(value = "Language", required = false) LanguageType lang) {
+        if (lang == null) {
+            lang = LanguageType.ENG;
+        }
         List<SubCategoryResponseDTO> subCategories = SubCategory.toDTOList(subCategoryService.findByCategoryId(id, lang, warehouseId));
         return !subCategories.isEmpty() ? Response.success(subCategories) : Response.notFound();
     }
 
     @ApiOperation(value = "Get Sub Categories and Initial SubCategory Products in a single call")
-    @GetMapping("/{id}/details")
+    @GetMapping("/{id:\\d+}/details")
     public ResponseEntity<GenericResponse<CategoryDetailsDTO>> getCategoryDetails(
             @PathVariable Long id,
             @RequestParam("warehouseId") Long warehouseId,
             @RequestParam(required = false) Long customerId,
             @RequestParam(defaultValue = "0", required = false) int pageNo,
             @RequestParam(defaultValue = "50", required = false) int pageSize,
-            @RequestHeader("Language") LanguageType lang) {
+            @RequestHeader(value = "Language", required = false) LanguageType lang) {
+        if (lang == null) {
+            lang = LanguageType.ENG;
+        }
 
         List<SubCategoryResponseDTO> subCategories = SubCategory.toDTOList(subCategoryService.findByCategoryId(id, lang, warehouseId));
         List<ProductDetailDTO> firstSubCatProducts = Collections.emptyList();
