@@ -35,6 +35,57 @@ public class CategoryOpenController {
     @Autowired
     private ProductControllerUtil productControllerUtil;
 
+    private static final java.util.Map<String, List<CategoryResponseDTO>> NESTED_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
+
+    @ApiOperation(value = "Get All Categories, SubCategories, and Products in ONE single nested tree API response")
+    @GetMapping("/all-nested")
+    public ResponseEntity<GenericResponse<List<CategoryResponseDTO>>> getAllNestedCategories(
+            @RequestParam("warehouseId") Long warehouseId,
+            @RequestParam(required = false) Long customerId,
+            @RequestHeader("Language") LanguageType lang) {
+
+        String cacheKey = warehouseId + "_" + lang + "_" + (customerId != null ? customerId : 0);
+        if (NESTED_CACHE.containsKey(cacheKey)) {
+            LOGGER.info("Returning nested categories from in-memory cache for key: {}", cacheKey);
+            return Response.success(NESTED_CACHE.get(cacheKey));
+        }
+
+        List<CategoryResponseDTO> categories = categoryService.getCategoriesByWarehouseId(warehouseId);
+        if (categories != null && !categories.isEmpty()) {
+            for (CategoryResponseDTO cat : categories) {
+                try {
+                    List<SubCategoryResponseDTO> subCats = SubCategory.toDTOList(
+                            subCategoryService.findByCategoryId(cat.getId(), lang, warehouseId));
+                    if (subCats != null && !subCats.isEmpty()) {
+                        for (SubCategoryResponseDTO subCat : subCats) {
+                            try {
+                                ResponseEntity<GenericResponse<List<ProductDetailDTO>>> response = 
+                                        productControllerUtil.getProductsBySubCategory(
+                                                lang, warehouseId, customerId, subCat.getId(), 0, 50);
+                                if (response != null && response.getBody() != null && response.getBody().getData() != null) {
+                                    subCat.setProducts(response.getBody().getData());
+                                } else {
+                                    subCat.setProducts(Collections.emptyList());
+                                }
+                            } catch (Exception e) {
+                                subCat.setProducts(Collections.emptyList());
+                            }
+                        }
+                    } else {
+                        subCats = Collections.emptyList();
+                    }
+                    cat.setSubCategories(subCats);
+                } catch (Exception e) {
+                    LOGGER.warn("Failed to build subcategories for category {}: {}", cat.getId(), e.getMessage());
+                    cat.setSubCategories(Collections.emptyList());
+                }
+            }
+            NESTED_CACHE.put(cacheKey, categories);
+        }
+
+        return !categories.isEmpty() ? Response.success(categories) : Response.notFound();
+    }
+
     @ApiOperation(value = "Get Categories by Warehouse Id")
     @GetMapping("/{id}")
     public ResponseEntity<GenericResponse<List<CategoryResponseDTO>>> findCategoryByWarehouseId(
@@ -94,56 +145,5 @@ public class CategoryOpenController {
                 .build();
 
         return Response.success(detailsDTO);
-    }
-
-    private static final java.util.Map<String, List<CategoryResponseDTO>> NESTED_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
-
-    @ApiOperation(value = "Get All Categories, SubCategories, and Products in ONE single nested tree API response")
-    @GetMapping("/all-nested")
-    public ResponseEntity<GenericResponse<List<CategoryResponseDTO>>> getAllNestedCategories(
-            @RequestParam("warehouseId") Long warehouseId,
-            @RequestParam(required = false) Long customerId,
-            @RequestHeader("Language") LanguageType lang) {
-
-        String cacheKey = warehouseId + "_" + lang + "_" + (customerId != null ? customerId : 0);
-        if (NESTED_CACHE.containsKey(cacheKey)) {
-            LOGGER.info("Returning nested categories from in-memory cache for key: {}", cacheKey);
-            return Response.success(NESTED_CACHE.get(cacheKey));
-        }
-
-        List<CategoryResponseDTO> categories = categoryService.getCategoriesByWarehouseId(warehouseId);
-        if (categories != null && !categories.isEmpty()) {
-            for (CategoryResponseDTO cat : categories) {
-                try {
-                    List<SubCategoryResponseDTO> subCats = SubCategory.toDTOList(
-                            subCategoryService.findByCategoryId(cat.getId(), lang, warehouseId));
-                    if (subCats != null && !subCats.isEmpty()) {
-                        for (SubCategoryResponseDTO subCat : subCats) {
-                            try {
-                                ResponseEntity<GenericResponse<List<ProductDetailDTO>>> response = 
-                                        productControllerUtil.getProductsBySubCategory(
-                                                lang, warehouseId, customerId, subCat.getId(), 0, 50);
-                                if (response != null && response.getBody() != null && response.getBody().getData() != null) {
-                                    subCat.setProducts(response.getBody().getData());
-                                } else {
-                                    subCat.setProducts(Collections.emptyList());
-                                }
-                            } catch (Exception e) {
-                                subCat.setProducts(Collections.emptyList());
-                            }
-                        }
-                    } else {
-                        subCats = Collections.emptyList();
-                    }
-                    cat.setSubCategories(subCats);
-                } catch (Exception e) {
-                    LOGGER.warn("Failed to build subcategories for category {}: {}", cat.getId(), e.getMessage());
-                    cat.setSubCategories(Collections.emptyList());
-                }
-            }
-            NESTED_CACHE.put(cacheKey, categories);
-        }
-
-        return !categories.isEmpty() ? Response.success(categories) : Response.notFound();
     }
 }
