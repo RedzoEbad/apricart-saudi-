@@ -38,7 +38,7 @@ public class CategoryOpenController {
     private static final java.util.Map<String, List<CategoryResponseDTO>> NESTED_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
 
     @ApiOperation(value = "Get All Categories, SubCategories, and Products in ONE single nested tree API response")
-    @GetMapping("/all-nested")
+    @GetMapping({"/all-nested", "/tree", "/nested", "/all"})
     public ResponseEntity<GenericResponse<List<CategoryResponseDTO>>> getAllNestedCategories(
             @RequestParam("warehouseId") Long warehouseId,
             @RequestParam(required = false) Long customerId,
