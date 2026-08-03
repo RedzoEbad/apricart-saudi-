@@ -25,13 +25,15 @@ public class ProductOpenController {
 
     @ApiOperation(value = "Get products by Category Id")
     @GetMapping("/category/{id}")
-    public ResponseEntity<GenericResponse<List<ProductDetailDTO>>> findProductsByCategoryId(@RequestHeader("Language") LanguageType lang,
+    public ResponseEntity<GenericResponse<List<ProductDetailDTO>>> findProductsByCategoryId(@RequestHeader(value = "Language", required = false) LanguageType lang,
                                                                                             @RequestParam Long warehouseId,
                                                                                             @RequestParam(required = false) Long customerId,
                                                                                             @PathVariable Long id,
                                                                                             @RequestParam(defaultValue = "0", required = false) int pageNo,
-                                                                                            @RequestParam(defaultValue = "10", required = false) int pageSize) {
-
+                                                                                            @RequestParam(defaultValue = "100", required = false) int pageSize) {
+        if (lang == null) {
+            lang = LanguageType.ENG;
+        }
         if (productControllerUtil.isDiscountedCategory(id, lang)) {
             return productControllerUtil.getDiscountedProductsResponse(lang, pageNo, pageSize, customerId);
         } else {
@@ -41,29 +43,33 @@ public class ProductOpenController {
 
     @ApiOperation(value = "Get products by Sub Category Id")
     @GetMapping("/subcategory/{id}")
-    public ResponseEntity<GenericResponse<List<ProductDetailDTO>>> findProductsBySubCategoryId(@RequestHeader("Language") LanguageType lang,
+    public ResponseEntity<GenericResponse<List<ProductDetailDTO>>> findProductsBySubCategoryId(@RequestHeader(value = "Language", required = false) LanguageType lang,
                                                                                                @RequestParam Long warehouseId,
                                                                                                @RequestParam(required = false) Long customerId,
                                                                                                @PathVariable Long id,
                                                                                                @RequestParam(defaultValue = "0", required = false) int pageNo,
                                                                                                @RequestParam(defaultValue = "10", required = false) int pageSize) {
-
+        if (lang == null) {
+            lang = LanguageType.ENG;
+        }
         return productControllerUtil.getProductsBySubCategory(lang, warehouseId, customerId, id, pageNo, pageSize);
     }
 
     @ApiOperation(value = "Get Product Details by Id")
     @GetMapping("/details/{productId}")
-    public ResponseEntity<GenericResponse<ProductDetailDTO>> findProductDetailsById(@RequestHeader("Language") LanguageType lang,
+    public ResponseEntity<GenericResponse<ProductDetailDTO>> findProductDetailsById(@RequestHeader(value = "Language", required = false) LanguageType lang,
                                                                                     @RequestParam Long warehouseId,
                                                                                     @RequestParam(required = false) Long customerId,
                                                                                     @PathVariable Long productId) {
-
+        if (lang == null) {
+            lang = LanguageType.ENG;
+        }
         return productControllerUtil.getProductDetails(lang, productId, warehouseId, customerId);
     }
 
     @ApiOperation(value = "Get similar items")
     @GetMapping("/similar-items")
-    public ResponseEntity<GenericResponse<List<ProductDetailDTO>>> getSimilarItems(@RequestHeader("Language") LanguageType lang,
+    public ResponseEntity<GenericResponse<List<ProductDetailDTO>>> getSimilarItems(@RequestHeader(value = "Language", required = false) LanguageType lang,
                                                                                    @RequestParam Long categoryId,
                                                                                    @RequestParam Long subCategoryId,
                                                                                    @RequestParam Long productId,
@@ -71,7 +77,9 @@ public class ProductOpenController {
                                                                                    @RequestParam(required = false) Long customerId,
                                                                                    @RequestParam(defaultValue = "0", required = false) int pageNo,
                                                                                    @RequestParam(defaultValue = "10") int limit) {
-
+        if (lang == null) {
+            lang = LanguageType.ENG;
+        }
         return productControllerUtil.getSimilarItems(lang, categoryId, subCategoryId, productId, warehouseId, customerId, pageNo, limit);
     }
 }
