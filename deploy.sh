@@ -3,9 +3,9 @@ set -e
 
 # ─── CONFIGURATION ───────────────────────────────────────────────
 SERVER_IP="185.164.25.196"
-SERVER_USER="apricart"
-SSH_KEY="$HOME/.ssh/id_ed25519"
-APP_DIR="/home/apricart/apricart-api"
+SERVER_USER="ubuntu"
+SSH_KEY="/Users/mac/Downloads/2666_private.rsa"
+APP_DIR="/home/ubuntu/apricart-saudi-"
 IMAGE_NAME="apricart-api:latest"
 TAR_NAME="apricart-api.tar"
 
@@ -51,7 +51,7 @@ echo "▶ Step 5/5: Deploying on server..."
 ssh -i $SSH_KEY -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'REMOTE'
 set -e
 
-APP_DIR="/home/apricart/apricart-api"
+APP_DIR="/home/ubuntu/apricart-saudi-"
 TAR_NAME="apricart-api.tar"
 IMAGE_NAME="apricart-api:latest"
 

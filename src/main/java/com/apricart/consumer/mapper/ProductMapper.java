@@ -43,10 +43,11 @@ public class ProductMapper {
     protected static final Logger LOGGER = LoggerFactory.getLogger(ProductMapper.class);
 
     public List<ProductDetailDTO> mapAndSortProductDetails(List<ProductWarehouseResponseDTO> productWarehouses, Long customerId, LanguageType languageType) {
+        java.util.Map<Long, TaxResponseDTO> taxCache = new java.util.HashMap<>();
         List<ProductDetailDTO> filteredProducts =  productWarehouses.stream()
                 .filter(pw -> Optional.ofNullable(pw.getProduct().getIsActive()).orElse(false))
                 .filter(pw -> Optional.ofNullable(pw.getInStock()).orElse(false) && Optional.of(pw.getQuantityInStock() > 0).orElse(false))
-                .map(pw -> mapToProductDetailDTO(pw, customerId, languageType))
+                .map(pw -> mapToProductDetailDTO(pw, customerId, languageType, taxCache))
                 .sorted(Comparator.comparing(ProductDetailDTO::getPosition))
                 .collect(Collectors.toList());
 
@@ -57,13 +58,20 @@ public class ProductMapper {
     }
 
     public ProductDetailDTO mapToProductDetailDTO(ProductWarehouseResponseDTO productWarehouse, Long customerId, LanguageType languageType) {
+        return mapToProductDetailDTO(productWarehouse, customerId, languageType, new java.util.HashMap<>());
+    }
+
+    public ProductDetailDTO mapToProductDetailDTO(ProductWarehouseResponseDTO productWarehouse, Long customerId, LanguageType languageType, java.util.Map<Long, TaxResponseDTO> taxCache) {
         ProductResponseDTO product = productWarehouse.getProduct();
-        TaxResponseDTO taxResponseDTO = Tax.toDTO(taxService.findById(productWarehouse.getTaxId(), languageType));
-        Boolean isWishList = wishListService.isProductInWishlist(customerId, product.getId());
-        double taxAmount = calculateTaxAmount(Double.parseDouble(taxResponseDTO.getTaxPercentage()), productWarehouse.getCurrentRate());
-        LOGGER.info("TAX AMOUNT: {}", taxAmount);
-        setTaxDetails(taxAmount, taxResponseDTO);
-        LOGGER.info("TAX DETAILS: {}", taxResponseDTO);
+        TaxResponseDTO taxResponseDTO = null;
+        if (productWarehouse.getTaxId() != null) {
+            taxResponseDTO = taxCache.computeIfAbsent(productWarehouse.getTaxId(), id -> Tax.toDTO(taxService.findById(id, languageType)));
+        }
+        Boolean isWishList = (customerId != null && customerId > 0) ? wishListService.isProductInWishlist(customerId, product.getId()) : false;
+        double taxAmount = taxResponseDTO != null ? calculateTaxAmount(Double.parseDouble(taxResponseDTO.getTaxPercentage().replace(PERCENT_SIGN, "")), productWarehouse.getCurrentRate()) : 0.0;
+        if (taxResponseDTO != null) {
+            setTaxDetails(taxAmount, taxResponseDTO);
+        }
         double discountedPrice = calculateDiscountedPrice(productWarehouse.getCurrentRate(), productWarehouse.getSpecialRate());
 
 
@@ -93,7 +101,7 @@ public class ProductMapper {
                 .currentRate(productWarehouse.getCurrentRate() != null ? productWarehouse.getCurrentRate() : null)
                 .inStock(productWarehouse.getInStock() != null ? productWarehouse.getInStock() : null)
                 .rate(productWarehouse.getRate() != null ? productWarehouse.getRate() : null)
-                .taxId(taxResponseDTO.getId() != null ? taxResponseDTO.getId() : null)
+                .taxId(taxResponseDTO != null && taxResponseDTO.getId() != null ? taxResponseDTO.getId() : null)
                 .tax(taxResponseDTO)
                 .productWarehouseId(productWarehouse.getId() != null ? productWarehouse.getId() : null)
                 .inStockQuantity(productWarehouse.getQuantityInStock() != null ? productWarehouse.getQuantityInStock() : null)
@@ -108,7 +116,7 @@ public class ProductMapper {
     }
 
     public ProductDetailDTO mapToProductDetailDTO(ProductWarehouse productWarehouse, LanguageType languageType) {
-        Product product = productService.findById(productWarehouse.getProduct().getId(), languageType);
+        Product product = productWarehouse.getProduct();
         double taxAmount = calculateTaxAmount(productWarehouse.getTax().getTaxPercentage(), productWarehouse.getCurrentRate());
         TaxResponseDTO tax = Tax.toDTO(productWarehouse.getTax());
         setTaxDetails(taxAmount, tax);
@@ -157,14 +165,10 @@ public class ProductMapper {
         tax.setTaxPercentage(!(String.valueOf((tax.getTaxPercentage())).trim().isEmpty()) ? tax.getTaxPercentage() + PERCENT_SIGN : null);
     }
     public static double calculateTaxAmount(double taxPercentage, String currentRate) {
-        LOGGER.info("TAX PERCENTAGE: {}", taxPercentage);
-        LOGGER.info("CURRENT RATE: {}", currentRate);
-
         double taxAmount = (taxPercentage / DIVIDE_AMOUNT) * Double.parseDouble(currentRate);
 
         double scale = Math.pow(10, DECIMAL_PLACES);
         taxAmount = Math.round(taxAmount * scale) / scale;
-        LOGGER.info("CALCULATED TAX AMOUNT: {}", taxAmount);
 
         return taxAmount;
     }
@@ -196,7 +200,10 @@ public class ProductMapper {
     }
 
     public ProductResponseDTO toProductDTO(ProductWarehouse productWarehouse, LanguageType languageType) {
-        Product product = getProduct(productWarehouse.getProduct().getId(), languageType);
+        Product product = productWarehouse.getProduct();
+        if (product == null) {
+            return null;
+        }
         return ProductResponseDTO.builder()
                 .id(product.getId())
                 .arabicTitle(product.getArabicTitle())
@@ -210,11 +217,11 @@ public class ProductMapper {
                 .isNewArrivals(product.getIsNewArrivals())
                 .isRecommended(product.getIsRecommended())
                 .isTrending(product.getIsTrending())
-                .categoryId(product.getCategory().getId())
-                .subCategoryId(product.getSubCategory().getId())
-                .brandId(product.getBrand().getId())
-                .brandName(product.getBrand().getName())
-                .brandNameArabic(product.getBrand().getArabicName())
+                .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
+                .subCategoryId(product.getSubCategory() != null ? product.getSubCategory().getId() : null)
+                .brandId(product.getBrand() != null ? product.getBrand().getId() : null)
+                .brandName(product.getBrand() != null ? product.getBrand().getName() : null)
+                .brandNameArabic(product.getBrand() != null ? product.getBrand().getArabicName() : null)
                 .position(product.getPosition())
                 .image(product.getImage())
                 .isActive(product.getIsActive())
