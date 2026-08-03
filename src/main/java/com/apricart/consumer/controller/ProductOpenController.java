@@ -34,11 +34,7 @@ public class ProductOpenController {
         if (lang == null) {
             lang = LanguageType.ENG;
         }
-        if (productControllerUtil.isDiscountedCategory(id, lang)) {
-            return productControllerUtil.getDiscountedProductsResponse(lang, pageNo, pageSize, customerId);
-        } else {
-            return productControllerUtil.getProductsResponseCategory(lang, id, warehouseId, customerId, pageNo, pageSize);
-        }
+        return productControllerUtil.getProductsResponseCategory(lang, id, warehouseId, customerId, pageNo, pageSize);
     }
 
     @ApiOperation(value = "Get products by Sub Category Id")
