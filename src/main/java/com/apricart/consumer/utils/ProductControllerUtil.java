@@ -81,12 +81,7 @@ public class ProductControllerUtil {
     }
 
     public ResponseEntity<GenericResponse<List<ProductDetailDTO>>> getProductsBySubCategory(LanguageType lang, Long warehouseId, Long customerId, Long id, int pageNo, int pageSize) {
-        SubCategory subCategory = subCategoryService.findById(id, lang);
-        if (isDiscountedCategory(subCategory.getCategory().getId(), lang)) {
-            return getDiscountedProductsResponse(lang, pageNo, pageSize, customerId);
-        } else {
-            return getProductsResponseSubCategory(lang, id, warehouseId, customerId, pageNo, pageSize);
-        }
+        return getProductsResponseSubCategory(lang, id, warehouseId, customerId, pageNo, pageSize);
     }
     public ResponseEntity<GenericResponse<List<ProductDetailDTO>>> getProductDetailResponse(List<ProductResponseDTO> products, Long customerId, LanguageType lang, Long warehouseId) {
         List<ProductWarehouseResponseDTO> productsDetails = products.stream()

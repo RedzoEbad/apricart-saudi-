@@ -65,13 +65,29 @@ public class ProductMapper {
         ProductResponseDTO product = productWarehouse.getProduct();
         TaxResponseDTO taxResponseDTO = null;
         if (productWarehouse.getTaxId() != null) {
-            taxResponseDTO = taxCache.computeIfAbsent(productWarehouse.getTaxId(), id -> Tax.toDTO(taxService.findById(id, languageType)));
+            TaxResponseDTO originalTax = taxCache.computeIfAbsent(productWarehouse.getTaxId(), id -> Tax.toDTO(taxService.findById(id, languageType)));
+            if (originalTax != null) {
+                String cleanPct = originalTax.getTaxPercentage() != null ? originalTax.getTaxPercentage().replace(PERCENT_SIGN, "").trim() : "0";
+                double taxPercentageVal = Double.parseDouble(cleanPct);
+                double taxAmount = calculateTaxAmount(taxPercentageVal, productWarehouse.getCurrentRate());
+                taxResponseDTO = TaxResponseDTO.builder()
+                        .id(originalTax.getId())
+                        .taxName(originalTax.getTaxName())
+                        .taxPercentage(cleanPct + PERCENT_SIGN)
+                        .taxAmount(taxAmount)
+                        .taxType(originalTax.getTaxType())
+                        .taxFactor(originalTax.getTaxFactor())
+                        .tdsPayableAccountId(originalTax.getTdsPayableAccountId())
+                        .taxAuthorityId(originalTax.getTaxAuthorityId())
+                        .taxAuthorityName(originalTax.getTaxAuthorityName())
+                        .taxSpecificType(originalTax.getTaxSpecificType())
+                        .countryCode(originalTax.getCountryCode())
+                        .purchaseTaxExpenseAccountId(originalTax.getPurchaseTaxExpenseAccountId())
+                        .isValueAdded(originalTax.isValueAdded())
+                        .build();
+            }
         }
         Boolean isWishList = (customerId != null && customerId > 0) ? wishListService.isProductInWishlist(customerId, product.getId()) : false;
-        double taxAmount = taxResponseDTO != null ? calculateTaxAmount(Double.parseDouble(taxResponseDTO.getTaxPercentage().replace(PERCENT_SIGN, "")), productWarehouse.getCurrentRate()) : 0.0;
-        if (taxResponseDTO != null) {
-            setTaxDetails(taxAmount, taxResponseDTO);
-        }
         double discountedPrice = calculateDiscountedPrice(productWarehouse.getCurrentRate(), productWarehouse.getSpecialRate());
 
 

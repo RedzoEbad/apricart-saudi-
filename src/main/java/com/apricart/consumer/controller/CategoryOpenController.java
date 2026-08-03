@@ -35,8 +35,6 @@ public class CategoryOpenController {
     @Autowired
     private ProductControllerUtil productControllerUtil;
 
-    private static final java.util.Map<String, List<CategoryResponseDTO>> NESTED_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
-
     @ApiOperation(value = "Get All Categories, SubCategories, and Products in ONE single nested tree API response")
     @GetMapping({"/all-nested", "/tree", "/nested", "/all"})
     public ResponseEntity<GenericResponse<List<CategoryResponseDTO>>> getAllNestedCategories(
@@ -46,12 +44,6 @@ public class CategoryOpenController {
 
         if (lang == null) {
             lang = LanguageType.ENG;
-        }
-
-        String cacheKey = warehouseId + "_" + lang + "_" + (customerId != null ? customerId : 0);
-        if (NESTED_CACHE.containsKey(cacheKey)) {
-            LOGGER.info("Returning nested categories from in-memory cache for key: {}", cacheKey);
-            return Response.success(NESTED_CACHE.get(cacheKey));
         }
 
         List<CategoryResponseDTO> categories = categoryService.getCategoriesByWarehouseId(warehouseId);
@@ -84,7 +76,6 @@ public class CategoryOpenController {
                     cat.setSubCategories(Collections.emptyList());
                 }
             }
-            NESTED_CACHE.put(cacheKey, categories);
         }
 
         return !categories.isEmpty() ? Response.success(categories) : Response.notFound();
