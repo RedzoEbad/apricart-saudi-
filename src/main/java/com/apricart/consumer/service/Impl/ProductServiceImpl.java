@@ -319,7 +319,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ResponseEntity<?> addOrUpdateProductImage(Long productId, MultipartFile image, LanguageType lang) {
         LOGGER.info("Adding or updating image for product with id: {}", productId);
-        final long ALLOWED_FILE_SIZE = (long) (1.5 * 1024);
+        final long ALLOWED_FILE_SIZE = (long) (20 * 1024);
 
         String imageFullPath = "";
         LOGGER.info("Product Image - Name: {}, Type: {}", image.getOriginalFilename(), image.getContentType());

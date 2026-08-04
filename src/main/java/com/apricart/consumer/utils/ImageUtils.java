@@ -95,7 +95,7 @@ public class ImageUtils {
     }
 
     private boolean isSpecialFilename(String originalFilename, String fileName) {
-        return originalFilename != null && fileName != null &&
+        return originalFilename != null && originalFilename.length() >= 3 && fileName != null &&
                 Utilities.getFirst(originalFilename.toUpperCase(), 3).equalsIgnoreCase("APR") &&
                 fileName.contains("-");
     }

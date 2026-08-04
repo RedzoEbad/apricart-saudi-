@@ -9,5 +9,10 @@ public enum ImageType {
     GIF,
     PNG,
     JPG,
-    JPEG
+    JPEG,
+    WEBP,
+    SVG,
+    BMP,
+    AVIF,
+    HEIC
 }

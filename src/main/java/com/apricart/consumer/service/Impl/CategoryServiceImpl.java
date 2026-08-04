@@ -174,7 +174,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public ResponseEntity<?> addOrUpdateCategoryImage(Long categoryId, MultipartFile image, Customer customer, LanguageType lang) {
         LOGGER.info("Adding or updating image for category with id: {}", categoryId);
-        final long ALLOWED_FILE_SIZE = (long) (1.5 * 1024);
+        final long ALLOWED_FILE_SIZE = (long) (20 * 1024);
 
         String imageFullPath = "";
         LOGGER.info("Category Image - Name: {}, Type: {}", image.getOriginalFilename(), image.getContentType());
