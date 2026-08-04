@@ -35,7 +35,6 @@ public class Product extends BaseEntity {
     private String arabicTitle;
 
     @Column(name = "image", columnDefinition = "TEXT")
-    @Field(index = org.hibernate.search.annotations.Index.YES, analyze = Analyze.NO, store = Store.YES)
     private String image;
 
     @Field(index= org.hibernate.search.annotations.Index.YES, analyze= Analyze.YES, store= Store.NO, termVector = TermVector.YES)
@@ -104,11 +103,11 @@ public class Product extends BaseEntity {
                 .isNewArrivals(product.getIsNewArrivals())
                 .isRecommended(product.getIsRecommended())
                 .isTrending(product.getIsTrending())
-                .categoryId(product.getCategory().getId())
-                .subCategoryId(product.getSubCategory().getId())
-                .brandId(product.getBrand().getId())
-                .brandName(product.getBrand().getName())
-                .brandNameArabic(product.getBrand().getArabicName())
+                .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
+                .subCategoryId(product.getSubCategory() != null ? product.getSubCategory().getId() : null)
+                .brandId(product.getBrand() != null ? product.getBrand().getId() : null)
+                .brandName(product.getBrand() != null ? product.getBrand().getName() : null)
+                .brandNameArabic(product.getBrand() != null ? product.getBrand().getArabicName() : null)
                 .position(product.getPosition())
                 .image(product.getImage())
                 .isActive(product.getIsActive());

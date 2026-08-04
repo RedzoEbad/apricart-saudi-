@@ -46,16 +46,21 @@ public class ImageUtils {
         }
 
         try {
+            Path uploadRoot = Paths.get(getUploadDirectory()).normalize();
             String uploadFileName = isSpecialFilename(originalFilename, fileName)
                     ? fileName.toUpperCase() + "." + fileType.toLowerCase()
-                    : fileName + "." + fileType.toLowerCase();
+                    : sanitizeFileName(fileName) + "." + fileType.toLowerCase();
 
-            Path copyLocation = Paths.get(getUploadDirectory(), uploadFileName).normalize();
+            Path copyLocation = uploadRoot.resolve(uploadFileName).normalize();
+            // Prevent path traversal outside the upload directory
+            if (!copyLocation.startsWith(uploadRoot)) {
+                throw new IOException("Invalid upload path: " + copyLocation);
+            }
             String downloadPath = getPathLocation() + uploadFileName;
 
-            Files.createDirectories(copyLocation.getParent());
-            if (!Files.isWritable(copyLocation.getParent())) {
-                throw new IOException("Upload directory is not writable: " + copyLocation.getParent());
+            Files.createDirectories(uploadRoot);
+            if (!Files.isWritable(uploadRoot)) {
+                throw new IOException("Upload directory is not writable: " + uploadRoot);
             }
 
             Files.copy(file.getInputStream(), copyLocation, StandardCopyOption.REPLACE_EXISTING);
@@ -98,6 +103,16 @@ public class ImageUtils {
         return originalFilename != null && originalFilename.length() >= 3 && fileName != null &&
                 Utilities.getFirst(originalFilename.toUpperCase(), 3).equalsIgnoreCase("APR") &&
                 fileName.contains("-");
+    }
+
+    /** Keep only safe filename characters for disk storage. */
+    private String sanitizeFileName(String fileName) {
+        if (fileName == null || fileName.trim().isEmpty()) {
+            return "image-" + System.currentTimeMillis();
+        }
+        String cleaned = fileName.replaceAll("[^a-zA-Z0-9._-]", "_");
+        cleaned = cleaned.replaceAll("_+", "_");
+        return cleaned.isEmpty() ? "image-" + System.currentTimeMillis() : cleaned;
     }
 
     public String getImagePath(String imageUrl) {

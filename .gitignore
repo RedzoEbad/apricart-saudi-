@@ -58,3 +58,12 @@ build/
 target/
 run.sh
 google/
+
+# Product seeding / OCR scripts (local tooling)
+seed_products.py
+ocr
+ocr.swift
+unmatched_images.json
+__pycache__/
+*.pyc
+venv/

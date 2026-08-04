@@ -319,52 +319,68 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ResponseEntity<?> addOrUpdateProductImage(Long productId, MultipartFile image, LanguageType lang) {
         LOGGER.info("Adding or updating image for product with id: {}", productId);
-        final long ALLOWED_FILE_SIZE = (long) (20 * 1024);
-
-        String imageFullPath = "";
-        LOGGER.info("Product Image - Name: {}, Type: {}", image.getOriginalFilename(), image.getContentType());
+        // 20 MB cap (value compared against size-in-KB below)
+        final long ALLOWED_FILE_SIZE_KB = 20L * 1024L;
 
         try {
             if (image == null || image.isEmpty() || image.getOriginalFilename() == null) {
-                return lang.equals(LanguageType.ARB) ? Response.notAcceptable(ERROR_IMAGE_FAILED_ARABIC.concat(ERROR_INVALID_FILE_TYPE_OR_SIZE_ARABIC)) : Response.notAcceptable(ERROR_IMAGE_FAILED.concat(ERROR_INVALID_FILE_TYPE_OR_SIZE));
+                return lang.equals(LanguageType.ARB)
+                        ? Response.notAcceptable(ERROR_IMAGE_FAILED_ARABIC.concat(ERROR_INVALID_FILE_TYPE_OR_SIZE_ARABIC))
+                        : Response.notAcceptable(ERROR_IMAGE_FAILED.concat(ERROR_INVALID_FILE_TYPE_OR_SIZE));
             }
 
-            String imageOriginalName = StringUtils.cleanPath(Objects.requireNonNull(image.getOriginalFilename()).toLowerCase()).replace(" ", "");
-            int lastDotIndex = imageOriginalName.lastIndexOf(".");
-            if (lastDotIndex <= 0 || lastDotIndex == imageOriginalName.length() - 1) {
-                return lang.equals(LanguageType.ARB) ? Response.notAcceptable(ERROR_IMAGE_FAILED_ARABIC.concat(ERROR_INVALID_FILE_TYPE_OR_SIZE_ARABIC)) : Response.notAcceptable(ERROR_IMAGE_FAILED.concat(ERROR_INVALID_FILE_TYPE_OR_SIZE));
+            LOGGER.info("Product Image - Name: {}, Type: {}, Size: {}",
+                    image.getOriginalFilename(), image.getContentType(), image.getSize());
+
+            String original = StringUtils.cleanPath(Objects.requireNonNull(image.getOriginalFilename())).toLowerCase();
+            int lastDotIndex = original.lastIndexOf('.');
+            if (lastDotIndex <= 0 || lastDotIndex == original.length() - 1) {
+                return lang.equals(LanguageType.ARB)
+                        ? Response.notAcceptable(ERROR_IMAGE_FAILED_ARABIC.concat(ERROR_INVALID_FILE_TYPE_OR_SIZE_ARABIC))
+                        : Response.notAcceptable(ERROR_IMAGE_FAILED.concat(ERROR_INVALID_FILE_TYPE_OR_SIZE));
             }
 
-            String imageFileName = imageOriginalName.substring(0, lastDotIndex);
-            String imageFileType = imageOriginalName.substring(lastDotIndex + 1).toUpperCase();
-            double imageFileSize = (image.getSize() / 1024.0);
+            String imageFileType = original.substring(lastDotIndex + 1).toUpperCase();
+            double imageFileSizeKb = image.getSize() / 1024.0;
 
-            LOGGER.info("File name: {}", imageOriginalName);
-            LOGGER.info("File type: {}", imageFileType);
-
-            if (!ImageUtils.isValidImageFileType(imageFileType) || imageFileSize > ALLOWED_FILE_SIZE) {
-                LOGGER.error("Invalid file type or size for image");
-                return lang.equals(LanguageType.ARB) ? Response.notAcceptable(ERROR_IMAGE_FAILED_ARABIC.concat(ERROR_INVALID_FILE_TYPE_OR_SIZE_ARABIC)) : Response.notAcceptable(ERROR_IMAGE_FAILED.concat(ERROR_INVALID_FILE_TYPE_OR_SIZE));
+            if (!ImageUtils.isValidImageFileType(imageFileType) || imageFileSizeKb > ALLOWED_FILE_SIZE_KB) {
+                LOGGER.error("Invalid file type or size for image: type={}, sizeKb={}", imageFileType, imageFileSizeKb);
+                return lang.equals(LanguageType.ARB)
+                        ? Response.notAcceptable(ERROR_IMAGE_FAILED_ARABIC.concat(ERROR_INVALID_FILE_TYPE_OR_SIZE_ARABIC))
+                        : Response.notAcceptable(ERROR_IMAGE_FAILED.concat(ERROR_INVALID_FILE_TYPE_OR_SIZE));
             }
 
-            // Upload the image
-            imageFullPath = imageUtils.upload(image, imageFileName, imageOriginalName, imageFileType);
-            LOGGER.info("Category Image Full Paths: {}", imageFullPath);
+            // Stable, filesystem-safe name (WhatsApp names have spaces/parens that break paths/search)
+            String safeFileName = "product-" + productId + "-" + System.currentTimeMillis();
+            String safeOriginal = safeFileName + "." + imageFileType.toLowerCase();
 
-            if (imageFullPath.isEmpty()) {
+            String imageFullPath = imageUtils.upload(image, safeFileName, safeOriginal, imageFileType);
+            LOGGER.info("Product image stored at: {}", imageFullPath);
+
+            if (imageFullPath == null || imageFullPath.isEmpty()) {
                 LOGGER.error("Failed to upload image");
                 return lang.equals(LanguageType.ARB) ? Response.error(ERROR_IMAGE_FAILED_ARABIC) : Response.error(ERROR_IMAGE_FAILED);
             }
 
-            Product product = findById(productId, lang);
-            product.setImage(imageFullPath);
-            save(product);
+            // Ensure product exists
+            findById(productId, lang);
 
-            LOGGER.info("Image uploaded successfully");
-            return lang.equals(LanguageType.ARB) ? Response.success(IMAGE_UPLOADED_SUCCESSFULLY_ARABIC) : Response.success(IMAGE_UPLOADED_SUCCESSFULLY);
+            // Native update avoids Hibernate Search reindex failures that roll back the JPA commit
+            int updated = productRepository.updateProductImage(productId, imageFullPath);
+            if (updated <= 0) {
+                LOGGER.error("No product row updated for id {}", productId);
+                return lang.equals(LanguageType.ARB) ? Response.error(ERROR_IMAGE_FAILED_ARABIC) : Response.error(ERROR_IMAGE_FAILED);
+            }
+
+            LOGGER.info("Image uploaded successfully for product {}", productId);
+            return lang.equals(LanguageType.ARB)
+                    ? Response.success(IMAGE_UPLOADED_SUCCESSFULLY_ARABIC)
+                    : Response.success(IMAGE_UPLOADED_SUCCESSFULLY);
         } catch (Exception e) {
-            LOGGER.error("Error processing/updating image: {}", e.getMessage());
-            return lang.equals(LanguageType.ARB) ? Response.error(ERROR_IMAGE_FAILED_ARABIC) : Response.error(ERROR_IMAGE_FAILED, e.getMessage());
+            LOGGER.error("Error processing/updating product image for id {}: {}", productId, e.getMessage(), e);
+            return lang.equals(LanguageType.ARB)
+                    ? Response.error(ERROR_IMAGE_FAILED_ARABIC)
+                    : Response.error(ERROR_IMAGE_FAILED, e.getMessage());
         }
     }
 

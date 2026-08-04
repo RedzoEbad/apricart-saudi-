@@ -7,7 +7,9 @@ import com.apricart.consumer.enity.SubCategory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
@@ -21,4 +23,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT DISTINCT pw.product FROM OrderItem oi JOIN oi.productWarehouse pw")
     Page<Product> findOrderedProducts(Pageable pageable);
+
+    /** Native update bypasses Hibernate Search listeners that can fail commits on image URL changes. */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = "UPDATE PRODUCT SET image = :image WHERE id = :id", nativeQuery = true)
+    int updateProductImage(@Param("id") Long id, @Param("image") String image);
 }
