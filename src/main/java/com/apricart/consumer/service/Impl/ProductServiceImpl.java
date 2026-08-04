@@ -280,9 +280,18 @@ public class ProductServiceImpl implements ProductService {
         LOGGER.info("Product Image - Name: {}, Type: {}", image.getOriginalFilename(), image.getContentType());
 
         try {
+            if (image == null || image.isEmpty() || image.getOriginalFilename() == null) {
+                return lang.equals(LanguageType.ARB) ? Response.notAcceptable(ERROR_IMAGE_FAILED_ARABIC.concat(ERROR_INVALID_FILE_TYPE_OR_SIZE_ARABIC)) : Response.notAcceptable(ERROR_IMAGE_FAILED.concat(ERROR_INVALID_FILE_TYPE_OR_SIZE));
+            }
+
             String imageOriginalName = StringUtils.cleanPath(Objects.requireNonNull(image.getOriginalFilename()).toLowerCase()).replace(" ", "");
-            String imageFileName = imageOriginalName.substring(0, imageOriginalName.lastIndexOf("."));
-            String imageFileType = imageOriginalName.substring(imageOriginalName.lastIndexOf(".") + 1).toUpperCase();
+            int lastDotIndex = imageOriginalName.lastIndexOf(".");
+            if (lastDotIndex <= 0 || lastDotIndex == imageOriginalName.length() - 1) {
+                return lang.equals(LanguageType.ARB) ? Response.notAcceptable(ERROR_IMAGE_FAILED_ARABIC.concat(ERROR_INVALID_FILE_TYPE_OR_SIZE_ARABIC)) : Response.notAcceptable(ERROR_IMAGE_FAILED.concat(ERROR_INVALID_FILE_TYPE_OR_SIZE));
+            }
+
+            String imageFileName = imageOriginalName.substring(0, lastDotIndex);
+            String imageFileType = imageOriginalName.substring(lastDotIndex + 1).toUpperCase();
             double imageFileSize = (image.getSize() / 1024.0);
 
             LOGGER.info("File name: {}", imageOriginalName);
