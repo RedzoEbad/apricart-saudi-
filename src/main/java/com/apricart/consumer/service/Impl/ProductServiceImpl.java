@@ -49,18 +49,26 @@ public class ProductServiceImpl implements ProductService {
     private ProductWarehouseService productWarehouseService;
     @Autowired
     private ProductWarehouseRepository productWarehouseRepository;
+    @Autowired
+    private com.apricart.consumer.repository.jpa.WarehouseRepository warehouseRepository;
+    @Autowired
+    private com.apricart.consumer.repository.jpa.PriceListRepository priceListRepository;
+    @Autowired
+    private com.apricart.consumer.repository.jpa.TaxRepository taxRepository;
+
     private static final String PRODUCT_ENG = "Product";
     private static final String PRODUCT_ARB = "المنتج";
 
     @Override
     public void addProduct(ProductRequestDTO productRequestDTO, LanguageType languageType) {
         LOGGER.info("Adding product: {}", productRequestDTO.toString());
-        Product product;
-        product = Product.fromDTO(productRequestDTO);
+        Product product = Product.fromDTO(productRequestDTO);
         product.setCategory(categoryService.findById(productRequestDTO.getCategoryId(), languageType));
         product.setSubCategory(subCategoryService.findById(productRequestDTO.getSubCategoryId(), languageType));
         product.setBrand(brandService.findById(productRequestDTO.getBrandId(), languageType));
-        save(product);
+        Product savedProduct = save(product);
+
+        createMissingWarehouseEntriesForProduct(savedProduct);
     }
 
     @Override
@@ -87,14 +95,51 @@ public class ProductServiceImpl implements ProductService {
         existingProduct.setUpdateDateTime(LocalDateTime.now());
         save(existingProduct);
 
-        LOGGER.info("Getting productWarehouse: {}", productRequestDTO.getId());
+        LOGGER.info("Updating productWarehouse entries for product: {}", productRequestDTO.getId());
+        createMissingWarehouseEntriesForProduct(existingProduct);
 
-        ProductWarehouse productWarehouse = productWarehouseService.findProductWarehouseByProductId(productRequestDTO.getId(), languageType);
-        productWarehouse.setCategory(productRequestDTO.getCategoryId() == null ? existingProduct.getCategory() : categoryService.findById(productRequestDTO.getCategoryId(), languageType));
-        productWarehouse.setSubCategory(productRequestDTO.getSubCategoryId() == null ? existingProduct.getSubCategory() : subCategoryService.findById(productRequestDTO.getSubCategoryId(), languageType));
-        productWarehouseRepository.save(productWarehouse);
+        List<ProductWarehouse> productWarehouses = productWarehouseRepository.findAll().stream()
+                .filter(pw -> pw.getProduct() != null && pw.getProduct().getId().equals(existingProduct.getId()))
+                .collect(Collectors.toList());
+
+        for (ProductWarehouse pw : productWarehouses) {
+            pw.setCategory(existingProduct.getCategory());
+            pw.setSubCategory(existingProduct.getSubCategory());
+            productWarehouseRepository.save(pw);
+        }
 
         return existingProduct;
+    }
+
+    private void createMissingWarehouseEntriesForProduct(Product product) {
+        if (product == null || product.getId() == null) return;
+
+        List<Warehouse> warehouses = warehouseRepository.findAll();
+        PriceList defaultPriceList = priceListRepository.findAll().stream().findFirst().orElse(null);
+        Tax defaultTax = taxRepository.findAll().stream().findFirst().orElse(null);
+
+        for (Warehouse warehouse : warehouses) {
+            java.util.Optional<ProductWarehouse> existing = productWarehouseRepository.findByProductAndWarehouseId(product, warehouse.getId());
+            if (!existing.isPresent()) {
+                ProductWarehouse pw = ProductWarehouse.builder()
+                        .product(product)
+                        .warehouse(warehouse)
+                        .category(product.getCategory())
+                        .subCategory(product.getSubCategory())
+                        .priceList(defaultPriceList)
+                        .tax(defaultTax)
+                        .rate("0.00")
+                        .currentRate("0.00")
+                        .specialRate("0.00")
+                        .discountPercentage("0%")
+                        .quantityInStock(100)
+                        .inStock(true)
+                        .isActive(true)
+                        .build();
+                productWarehouseRepository.save(pw);
+                LOGGER.info("Auto-created ProductWarehouse entry for product ID {} in warehouse ID {}", product.getId(), warehouse.getId());
+            }
+        }
     }
 
     @Override
