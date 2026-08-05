@@ -42,7 +42,7 @@ public class Banner extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private PositionType position;
 
-    @Column(name = "image", columnDefinition = "TEXT") // ✅ same as in Category
+    @Column(name = "image", columnDefinition = "TEXT")  
     private String image;
 
     public static BannerResponseDTO toDTO(Banner banner) {

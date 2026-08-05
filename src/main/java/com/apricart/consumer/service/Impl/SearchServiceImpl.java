@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class SearchServiceImpl implements SearchService {
 
     private static final Logger logger = LoggerFactory.getLogger(SearchServiceImpl.class);
@@ -43,15 +44,7 @@ public class SearchServiceImpl implements SearchService {
     @Autowired
     private ProductMapper productMapper;
 
-    @Async
-    @EventListener(ApplicationReadyEvent.class)
-    public void init() {
-        logger.info("Starting async reindexing after application ready...");
-        reindexingService.reindex();
-    }
-
     @Override
-    @Transactional(readOnly = true)
     public List<ProductWarehouse> searchProduct(String query, Long warehouseId) {
         List<ProductWarehouse> results = Collections.emptyList();
         try {
@@ -106,11 +99,24 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ProductDetailDTO> searchProductDetails(String query, Long warehouseId, Long customerId, LanguageType lang) {
         List<ProductWarehouse> productWarehouses = searchProduct(query, warehouseId);
         if (productWarehouses == null || productWarehouses.isEmpty()) {
             return Collections.emptyList();
+        }
+        for (ProductWarehouse pw : productWarehouses) {
+            if (pw.getProduct() != null) {
+                pw.getProduct().getTitle();
+                pw.getProduct().getArabicTitle();
+                if (pw.getProduct().getCategory() != null) pw.getProduct().getCategory().getId();
+                if (pw.getProduct().getSubCategory() != null) pw.getProduct().getSubCategory().getId();
+                if (pw.getProduct().getBrand() != null) {
+                    pw.getProduct().getBrand().getName();
+                    pw.getProduct().getBrand().getArabicName();
+                }
+            }
+            if (pw.getTax() != null) pw.getTax().getId();
+            if (pw.getWarehouse() != null) pw.getWarehouse().getId();
         }
         List<ProductWarehouseResponseDTO> products = productMapper.toProductWarehouseDTOList(productWarehouses, lang);
         return productMapper.mapAndSortProductDetails(products, customerId, lang);
