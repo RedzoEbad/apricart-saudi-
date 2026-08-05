@@ -25,6 +25,16 @@ public interface ProductWarehouseRepository extends JpaRepository<ProductWarehou
 
     @Query("SELECT pw FROM ProductWarehouse pw " +
             "JOIN pw.product p " +
+            "WHERE p.brand.id = :brandId " +
+            "AND p.isActive = true " +
+            "AND pw.warehouse.id = :warehouseId " +
+            "ORDER BY p.position ASC")
+    Page<ProductWarehouse> findProductByBrandIdAndWarehouseId(@Param("brandId") Long brandId,
+                                                               @Param("warehouseId") Long warehouseId,
+                                                               Pageable pageable);
+
+    @Query("SELECT pw FROM ProductWarehouse pw " +
+            "JOIN pw.product p " +
             "WHERE p.isNewArrivals = true " +
             "AND p.isActive = true " +
             "AND pw.warehouse.id = :warehouseId " +

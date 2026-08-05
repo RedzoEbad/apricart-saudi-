@@ -78,4 +78,18 @@ public class ProductOpenController {
         }
         return productControllerUtil.getSimilarItems(lang, categoryId, subCategoryId, productId, warehouseId, customerId, pageNo, limit);
     }
+
+    @ApiOperation(value = "Get products by Brand Id")
+    @GetMapping("/brand/{id}")
+    public ResponseEntity<GenericResponse<List<ProductDetailDTO>>> findProductsByBrandId(@RequestHeader(value = "Language", required = false) LanguageType lang,
+                                                                                         @RequestParam Long warehouseId,
+                                                                                         @RequestParam(required = false) Long customerId,
+                                                                                         @PathVariable Long id,
+                                                                                         @RequestParam(defaultValue = "0", required = false) int pageNo,
+                                                                                         @RequestParam(defaultValue = "200", required = false) int pageSize) {
+        if (lang == null) {
+            lang = LanguageType.ENG;
+        }
+        return productControllerUtil.getProductsByBrand(lang, warehouseId, customerId, id, pageNo, pageSize);
+    }
 }

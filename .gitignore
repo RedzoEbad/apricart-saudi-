@@ -59,11 +59,13 @@ target/
 run.sh
 google/
 
-# Product seeding / OCR scripts (local tooling)
+# Product seeding / OCR / image-migration scripts (local tooling)
 seed_products.py
+migrate_images_to_supabase.py
 ocr
 ocr.swift
 unmatched_images.json
+seed_results.log
 __pycache__/
 *.pyc
 venv/

@@ -23,6 +23,7 @@ public interface ProductWarehouseService {
     void deleteProductWarehouse(Long id, LanguageType languageType);
     List<ProductWarehouseResponseDTO> findByCategoryIdAndWarehouseId(Long id, Long warehouseId, int page, int size, LanguageType languageType);
     List<ProductWarehouseResponseDTO> findBySubCategoryIdAndWarehouseId(Long id, Long warehouseId, int page, int size, LanguageType languageType);
+    List<ProductWarehouseResponseDTO> findByBrandIdAndWarehouseId(Long brandId, Long warehouseId, int page, int size, LanguageType languageType);
     List<ProductWarehouseResponseDTO> findNewArrivalsByWarehouseId(Long warehouseId, int pageNo, int pageSize, LanguageType languageType);
     List<ProductWarehouseResponseDTO> findTrendingByWarehouseId(Long warehouseId, int pageNo, int pageSize, LanguageType languageType);
     List<ProductWarehouseResponseDTO> findRecommendedByWarehouseId(Long warehouseId, int pageNo, int pageSize, LanguageType languageType);

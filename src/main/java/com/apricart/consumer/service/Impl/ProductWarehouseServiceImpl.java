@@ -184,6 +184,13 @@ public class ProductWarehouseServiceImpl implements ProductWarehouseService {
     }
 
     @Override
+    public List<ProductWarehouseResponseDTO> findByBrandIdAndWarehouseId(Long brandId, Long warehouseId, int page, int size, LanguageType languageType) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        List<ProductWarehouse> productWarehouses = productWarehouseRepository.findProductByBrandIdAndWarehouseId(brandId, warehouseId, pageRequest).getContent();
+        return ProductWarehouse.toDTOList(productWarehouses, productMapper, languageType);
+    }
+
+    @Override
     public List<Category> findCategoriesByWarehouseId(Long warehouseId) {
         LOGGER.info("Fetching categories for warehouseId: {}", warehouseId);
         List<Category> warehouseCategories = productWarehouseRepository.findDistinctCategoriesByWarehouseId(warehouseId);

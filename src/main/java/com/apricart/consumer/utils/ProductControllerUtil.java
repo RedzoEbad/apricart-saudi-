@@ -83,6 +83,12 @@ public class ProductControllerUtil {
     public ResponseEntity<GenericResponse<List<ProductDetailDTO>>> getProductsBySubCategory(LanguageType lang, Long warehouseId, Long customerId, Long id, int pageNo, int pageSize) {
         return getProductsResponseSubCategory(lang, id, warehouseId, customerId, pageNo, pageSize);
     }
+
+    public ResponseEntity<GenericResponse<List<ProductDetailDTO>>> getProductsByBrand(LanguageType lang, Long warehouseId, Long customerId, Long brandId, int pageNo, int pageSize) {
+        List<ProductWarehouseResponseDTO> productsDetails = productWarehouseService.findByBrandIdAndWarehouseId(brandId, warehouseId, pageNo, pageSize, lang);
+        List<ProductDetailDTO> products = productMapper.mapAndSortProductDetails(productsDetails, customerId, lang);
+        return !products.isEmpty() ? Response.success(products) : Response.notFound();
+    }
     public ResponseEntity<GenericResponse<List<ProductDetailDTO>>> getProductDetailResponse(List<ProductResponseDTO> products, Long customerId, LanguageType lang, Long warehouseId) {
         List<ProductWarehouseResponseDTO> productsDetails = products.stream()
                 .map(product -> productWarehouseService.findByProductId(product.getId(), lang))
