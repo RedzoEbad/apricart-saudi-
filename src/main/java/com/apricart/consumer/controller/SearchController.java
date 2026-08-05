@@ -12,6 +12,7 @@ import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +40,7 @@ public class SearchController {
 	@Autowired
 	ProductMapper productMapper;
 
+	@Transactional(readOnly = true)
 	@GetMapping("/product")
 	public ResponseEntity<GenericResponse<List<ProductDetailDTO>>> search(@RequestHeader("Language") LanguageType lang,
 																		  @RequestParam(required = false) Long customerId,
@@ -51,3 +53,4 @@ public class SearchController {
 	}
 
 }
+

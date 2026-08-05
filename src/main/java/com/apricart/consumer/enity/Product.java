@@ -26,27 +26,27 @@ public class Product extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Field(index= org.hibernate.search.annotations.Index.YES, analyze= Analyze.YES, store= Store.NO, termVector = TermVector.YES)
+    @Field(index = org.hibernate.search.annotations.Index.YES, analyze = Analyze.YES, store = Store.NO, termVector = TermVector.YES)
     @Column
     private String title;
 
-    @Field(index= org.hibernate.search.annotations.Index.YES, analyze= Analyze.YES, store= Store.NO, termVector = TermVector.YES)
+    @Field(index = org.hibernate.search.annotations.Index.YES, analyze = Analyze.YES, store = Store.NO, termVector = TermVector.YES)
     @Column
     private String arabicTitle;
 
     @Column(name = "image", columnDefinition = "TEXT")
     private String image;
 
-    @Field(index= org.hibernate.search.annotations.Index.YES, analyze= Analyze.YES, store= Store.NO, termVector = TermVector.YES)
+    @Field(index = org.hibernate.search.annotations.Index.YES, analyze = Analyze.YES, store = Store.NO, termVector = TermVector.YES)
     @Column(length = 24, unique = true)
     @SKUFormat
     private String sku;
 
-    @Field(index= org.hibernate.search.annotations.Index.YES, analyze= Analyze.YES, store= Store.NO, termVector = TermVector.YES)
+    @Field(index = org.hibernate.search.annotations.Index.YES, analyze = Analyze.YES, store = Store.NO, termVector = TermVector.YES)
     @Column
     private String description;
 
-    @Field(index= org.hibernate.search.annotations.Index.YES, analyze= Analyze.YES, store= Store.NO, termVector = TermVector.YES)
+    @Field(index = org.hibernate.search.annotations.Index.YES, analyze = Analyze.YES, store = Store.NO, termVector = TermVector.YES)
     @Column
     private String arabicDescription;
 
@@ -89,7 +89,8 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "brand_id")
     private Brand brand;
 
-    private static ProductResponseDTO.ProductResponseDTOBuilder buildDTO(Product product, ProductResponseDTO.ProductResponseDTOBuilder builder) {
+    private static ProductResponseDTO.ProductResponseDTOBuilder buildDTO(Product product,
+            ProductResponseDTO.ProductResponseDTOBuilder builder) {
         return builder
                 .id(product.getId())
                 .arabicTitle(product.getArabicTitle())

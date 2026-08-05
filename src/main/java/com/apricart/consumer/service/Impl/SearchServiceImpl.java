@@ -18,7 +18,7 @@ import org.springframework.scheduling.annotation.Async;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ProductWarehouse> searchProduct(String query, Long warehouseId) {
         List<ProductWarehouse> results = Collections.emptyList();
         try {
