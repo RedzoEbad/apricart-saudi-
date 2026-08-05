@@ -40,16 +40,14 @@ public class SearchController {
 	@Autowired
 	ProductMapper productMapper;
 
-	@Transactional(readOnly = true)
 	@GetMapping("/product")
 	public ResponseEntity<GenericResponse<List<ProductDetailDTO>>> search(@RequestHeader("Language") LanguageType lang,
 																		  @RequestParam(required = false) Long customerId,
 																		  @RequestParam("wId") Long warehouseId,
 																		  @RequestParam("q") String query) {
 
-		List<ProductWarehouseResponseDTO>  products =  productMapper.toProductWarehouseDTOList(searchService.searchProduct(query, warehouseId), lang);
-		return !products.isEmpty() ? Response.success(productMapper.mapAndSortProductDetails(products, customerId, lang)) : Response.notFound();
-
+		List<ProductDetailDTO> products = searchService.searchProductDetails(query, warehouseId, customerId, lang);
+		return !products.isEmpty() ? Response.success(products) : Response.notFound();
 	}
 
 }

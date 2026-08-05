@@ -1,6 +1,10 @@
 package com.apricart.consumer.service.Impl;
 
 import com.apricart.consumer.enity.ProductWarehouse;
+import com.apricart.consumer.mapper.ProductMapper;
+import com.apricart.consumer.security.dto.dto.ProductDetailDTO;
+import com.apricart.consumer.security.dto.response.ProductWarehouseResponseDTO;
+import com.apricart.consumer.security.enums.LanguageType;
 import com.apricart.consumer.service.ReindexingService;
 import com.apricart.consumer.service.SearchService;
 import org.apache.lucene.search.Query;
@@ -35,6 +39,9 @@ public class SearchServiceImpl implements SearchService {
 
     @Autowired
     private ReindexingService reindexingService;
+
+    @Autowired
+    private ProductMapper productMapper;
 
     @Async
     @EventListener(ApplicationReadyEvent.class)
@@ -96,5 +103,16 @@ public class SearchServiceImpl implements SearchService {
             logger.error("Error occurred while searching for products with keyword: '{}'", query, e);
         }
         return results;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductDetailDTO> searchProductDetails(String query, Long warehouseId, Long customerId, LanguageType lang) {
+        List<ProductWarehouse> productWarehouses = searchProduct(query, warehouseId);
+        if (productWarehouses == null || productWarehouses.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<ProductWarehouseResponseDTO> products = productMapper.toProductWarehouseDTOList(productWarehouses, lang);
+        return productMapper.mapAndSortProductDetails(products, customerId, lang);
     }
 }
