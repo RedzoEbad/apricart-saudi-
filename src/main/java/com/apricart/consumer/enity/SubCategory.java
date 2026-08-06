@@ -22,10 +22,7 @@ import java.util.stream.Collectors;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "SUB_CATEGORY", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_subcategory_category_name", columnNames = {"category_id", "name"}),
-        @UniqueConstraint(name = "uk_subcategory_category_arabic_name", columnNames = {"category_id", "arabic_name"})
-})
+@Table(name = "SUB_CATEGORY")
 public class SubCategory {
 
     @Id

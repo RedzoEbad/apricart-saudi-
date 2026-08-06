@@ -7,13 +7,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
  * Hibernate ddl-auto=update does not drop obsolete unique constraints.
  * Subcategories used to be globally unique by name; they are now unique per category.
- * This migrator drops the old single-column unique constraints so same names can exist
- * under different categories.
+ * Uniqueness for products/subcategories is enforced in services; this migrator only
+ * drops obsolete global uniques and best-effort adds composite uniques using real DB column names.
  */
 @Component
 public class SchemaUniquenessMigrator implements CommandLineRunner {
@@ -28,15 +29,83 @@ public class SchemaUniquenessMigrator implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        dropSingleColumnUniques("sub_category", "name");
-        dropSingleColumnUniques("sub_category", "arabic_name");
-        ensureCompositeUnique("sub_category", "uk_subcategory_category_name", "category_id", "name");
-        ensureCompositeUnique("sub_category", "uk_subcategory_category_arabic_name", "category_id", "arabic_name");
-        ensureCompositeUnique("product", "uk_product_subcategory_title", "sub_category_id", "title");
-        ensureCompositeUnique("product", "uk_product_subcategory_arabic_title", "sub_category_id", "arabic_title");
+        String subTable = resolveTable("sub_category", "SUB_CATEGORY");
+        String productTable = resolveTable("product", "PRODUCT");
+
+        if (subTable != null) {
+            dropSingleColumnUniques(subTable, resolveColumn(subTable, "name"));
+            dropSingleColumnUniques(subTable, resolveColumn(subTable, "arabic_name", "arabicname"));
+            String categoryId = resolveColumn(subTable, "category_id", "categoryid");
+            String nameCol = resolveColumn(subTable, "name");
+            String arabicCol = resolveColumn(subTable, "arabic_name", "arabicname");
+            if (categoryId != null && nameCol != null) {
+                ensureCompositeUnique(subTable, "uk_subcategory_category_name", categoryId, nameCol);
+            }
+            if (categoryId != null && arabicCol != null) {
+                ensureCompositeUnique(subTable, "uk_subcategory_category_arabic_name", categoryId, arabicCol);
+            }
+        }
+
+        if (productTable != null) {
+            String subCatId = resolveColumn(productTable, "sub_category_id", "subcategoryid", "sub_category_id");
+            String titleCol = resolveColumn(productTable, "title");
+            String arabicTitleCol = resolveColumn(productTable, "arabic_title", "arabictitle", "arabic_title");
+            if (subCatId != null && titleCol != null) {
+                ensureCompositeUnique(productTable, "uk_product_subcategory_title", subCatId, titleCol);
+            }
+            if (subCatId != null && arabicTitleCol != null) {
+                ensureCompositeUnique(productTable, "uk_product_subcategory_arabic_title", subCatId, arabicTitleCol);
+            }
+        }
+    }
+
+    private String resolveTable(String... candidates) {
+        for (String candidate : candidates) {
+            Integer count = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND lower(table_name) = lower(?)",
+                    Integer.class, candidate);
+            if (count != null && count > 0) {
+                String actual = jdbcTemplate.queryForObject(
+                        "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND lower(table_name) = lower(?) LIMIT 1",
+                        String.class, candidate);
+                return actual;
+            }
+        }
+        LOGGER.warn("Table not found among candidates: {}", (Object) candidates);
+        return null;
+    }
+
+    private String resolveColumn(String table, String... candidates) {
+        for (String candidate : candidates) {
+            Integer count = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = 'public' AND lower(table_name) = lower(?) AND lower(column_name) = lower(?)",
+                    Integer.class, table, candidate);
+            if (count != null && count > 0) {
+                return jdbcTemplate.queryForObject(
+                        "SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND lower(table_name) = lower(?) AND lower(column_name) = lower(?) LIMIT 1",
+                        String.class, table, candidate);
+            }
+        }
+        // fuzzy: match ignoring underscores
+        List<String> columns = jdbcTemplate.queryForList(
+                "SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND lower(table_name) = lower(?)",
+                String.class, table);
+        for (String candidate : candidates) {
+            String normalized = candidate.replace("_", "").toLowerCase(Locale.ROOT);
+            for (String col : columns) {
+                if (col.replace("_", "").toLowerCase(Locale.ROOT).equals(normalized)) {
+                    return col;
+                }
+            }
+        }
+        LOGGER.warn("Column not found on {}: {}", table, String.join(",", candidates));
+        return null;
     }
 
     private void dropSingleColumnUniques(String table, String column) {
+        if (column == null) {
+            return;
+        }
         try {
             List<Map<String, Object>> constraints = jdbcTemplate.queryForList(
                     "SELECT c.conname AS name " +
@@ -51,10 +120,9 @@ public class SchemaUniquenessMigrator implements CommandLineRunner {
             for (Map<String, Object> row : constraints) {
                 String name = String.valueOf(row.get("name"));
                 LOGGER.info("Dropping obsolete unique constraint {}.{}", table, name);
-                jdbcTemplate.execute("ALTER TABLE " + table + " DROP CONSTRAINT IF EXISTS " + name);
+                jdbcTemplate.execute("ALTER TABLE \"" + table + "\" DROP CONSTRAINT IF EXISTS \"" + name + "\"");
             }
 
-            // Also drop unique indexes that are not constraints (Hibernate sometimes creates these)
             List<Map<String, Object>> indexes = jdbcTemplate.queryForList(
                     "SELECT i.relname AS name " +
                             "FROM pg_index ix " +
@@ -68,7 +136,7 @@ public class SchemaUniquenessMigrator implements CommandLineRunner {
             for (Map<String, Object> row : indexes) {
                 String name = String.valueOf(row.get("name"));
                 LOGGER.info("Dropping obsolete unique index {}.{}", table, name);
-                jdbcTemplate.execute("DROP INDEX IF EXISTS " + name);
+                jdbcTemplate.execute("DROP INDEX IF EXISTS \"" + name + "\"");
             }
         } catch (Exception e) {
             LOGGER.warn("Could not drop single-column unique on {}.{}: {}", table, column, e.getMessage());
@@ -85,8 +153,8 @@ public class SchemaUniquenessMigrator implements CommandLineRunner {
             }
             LOGGER.info("Creating unique constraint {} on {}.({}, {})", constraintName, table, col1, col2);
             jdbcTemplate.execute(
-                    "ALTER TABLE " + table + " ADD CONSTRAINT " + constraintName +
-                            " UNIQUE (" + col1 + ", " + col2 + ")");
+                    "ALTER TABLE \"" + table + "\" ADD CONSTRAINT " + constraintName +
+                            " UNIQUE (\"" + col1 + "\", \"" + col2 + "\")");
         } catch (Exception e) {
             LOGGER.warn("Could not create unique constraint {} on {}: {}. " +
                             "Clean duplicate rows if needed, then restart.",
