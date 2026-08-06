@@ -12,4 +12,5 @@ public interface PriceListRepository extends JpaRepository<PriceList, Long> {
     PriceList findByName(String name);
     List<PriceList> findByPriceBookType(PriceBookType priceBookType);
     List<PriceList> findByCurrency(Currency currency);
+    java.util.Optional<PriceList> findFirstByOrderByIdAsc();
 }

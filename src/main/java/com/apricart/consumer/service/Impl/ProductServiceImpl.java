@@ -158,8 +158,9 @@ public class ProductServiceImpl implements ProductService {
         if (product == null || product.getId() == null) return;
 
         List<Warehouse> warehouses = warehouseRepository.findAll();
-        PriceList defaultPriceList = priceListRepository.findAll().stream().findFirst().orElse(null);
-        Tax defaultTax = taxRepository.findAll().stream().findFirst().orElse(null);
+        // Load a single default row — findAll() materializes every price list and fails on any legacy enum value.
+        PriceList defaultPriceList = priceListRepository.findFirstByOrderByIdAsc().orElse(null);
+        Tax defaultTax = taxRepository.findAll(PageRequest.of(0, 1)).stream().findFirst().orElse(null);
 
         for (Warehouse warehouse : warehouses) {
             java.util.Optional<ProductWarehouse> existing = productWarehouseRepository.findByProductAndWarehouseId(product, warehouse.getId());
