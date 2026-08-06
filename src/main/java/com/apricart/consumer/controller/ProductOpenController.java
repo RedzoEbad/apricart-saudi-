@@ -2,6 +2,7 @@ package com.apricart.consumer.controller;
 
 import com.apricart.consumer.generic.GenericResponse;
 import com.apricart.consumer.security.dto.dto.ProductDetailDTO;
+import com.apricart.consumer.security.dto.response.PaginatedResponseDTO;
 import com.apricart.consumer.security.enums.LanguageType;
 import com.apricart.consumer.utils.ProductControllerUtil;
 import io.swagger.annotations.Api;
@@ -22,6 +23,20 @@ public class ProductOpenController {
 
     @Autowired
     private ProductControllerUtil productControllerUtil;
+
+    @ApiOperation(value = "Get all products (paginated, warehouse-scoped)")
+    @GetMapping
+    public ResponseEntity<GenericResponse<PaginatedResponseDTO<ProductDetailDTO>>> getAllProducts(
+            @RequestHeader(value = "Language", required = false) LanguageType lang,
+            @RequestParam Long warehouseId,
+            @RequestParam(required = false) Long customerId,
+            @RequestParam(defaultValue = "0", required = false) int pageNo,
+            @RequestParam(defaultValue = "20", required = false) int pageSize) {
+        if (lang == null) {
+            lang = LanguageType.ENG;
+        }
+        return productControllerUtil.getAllProducts(lang, warehouseId, customerId, pageNo, pageSize);
+    }
 
     @ApiOperation(value = "Get products by Category Id")
     @GetMapping("/category/{id}")

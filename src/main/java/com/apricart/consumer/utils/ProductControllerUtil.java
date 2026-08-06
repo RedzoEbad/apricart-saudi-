@@ -6,6 +6,7 @@ import com.apricart.consumer.generic.GenericResponse;
 import com.apricart.consumer.generic.Response;
 import com.apricart.consumer.mapper.ProductMapper;
 import com.apricart.consumer.security.dto.dto.ProductDetailDTO;
+import com.apricart.consumer.security.dto.response.PaginatedResponseDTO;
 import com.apricart.consumer.security.dto.response.ProductResponseDTO;
 import com.apricart.consumer.security.dto.response.ProductWarehouseResponseDTO;
 import com.apricart.consumer.security.enums.LanguageType;
@@ -89,6 +90,24 @@ public class ProductControllerUtil {
         List<ProductDetailDTO> products = productMapper.mapAndSortProductDetails(productsDetails, customerId, lang);
         return !products.isEmpty() ? Response.success(products) : Response.notFound();
     }
+
+    public ResponseEntity<GenericResponse<PaginatedResponseDTO<ProductDetailDTO>>> getAllProducts(
+            LanguageType lang, Long warehouseId, Long customerId, int pageNo, int pageSize) {
+        org.springframework.data.domain.Page<ProductWarehouseResponseDTO> page =
+                productWarehouseService.findAllByWarehouseId(warehouseId, pageNo, pageSize, lang);
+        List<ProductDetailDTO> products = productMapper.mapAndSortProductDetails(page.getContent(), customerId, lang);
+        PaginatedResponseDTO<ProductDetailDTO> payload = PaginatedResponseDTO.<ProductDetailDTO>builder()
+                .content(products)
+                .pageNo(page.getNumber())
+                .pageSize(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .first(page.isFirst())
+                .last(page.isLast())
+                .build();
+        return Response.success(payload);
+    }
+
     public ResponseEntity<GenericResponse<List<ProductDetailDTO>>> getProductDetailResponse(List<ProductResponseDTO> products, Long customerId, LanguageType lang, Long warehouseId) {
         List<ProductWarehouseResponseDTO> productsDetails = products.stream()
                 .map(product -> productWarehouseService.findByProductId(product.getId(), lang))

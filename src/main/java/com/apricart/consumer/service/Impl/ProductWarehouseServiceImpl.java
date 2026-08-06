@@ -11,6 +11,8 @@ import com.apricart.consumer.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -188,6 +190,14 @@ public class ProductWarehouseServiceImpl implements ProductWarehouseService {
         PageRequest pageRequest = PageRequest.of(page, size);
         List<ProductWarehouse> productWarehouses = productWarehouseRepository.findProductByBrandIdAndWarehouseId(brandId, warehouseId, pageRequest).getContent();
         return ProductWarehouse.toDTOList(productWarehouses, productMapper, languageType);
+    }
+
+    @Override
+    public Page<ProductWarehouseResponseDTO> findAllByWarehouseId(Long warehouseId, int page, int size, LanguageType languageType) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<ProductWarehouse> productWarehouses = productWarehouseRepository.findAllActiveByWarehouseId(warehouseId, pageRequest);
+        List<ProductWarehouseResponseDTO> content = ProductWarehouse.toDTOList(productWarehouses.getContent(), productMapper, languageType);
+        return new PageImpl<>(content, pageRequest, productWarehouses.getTotalElements());
     }
 
     @Override
