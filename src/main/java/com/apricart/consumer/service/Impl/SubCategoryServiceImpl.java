@@ -3,6 +3,7 @@ package com.apricart.consumer.service.Impl;
 import com.apricart.consumer.enity.Category;
 import com.apricart.consumer.enity.Customer;
 import com.apricart.consumer.enity.SubCategory;
+import com.apricart.consumer.exceptions.DuplicateResourceException;
 import com.apricart.consumer.exceptions.ResourceNotFoundException;
 import com.apricart.consumer.generic.Response;
 import com.apricart.consumer.repository.jpa.SubCategoryRepository;
@@ -147,8 +148,10 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     @Override
     public void addSubCategory(SubCategoryRequestDTO categoryRequestDTO, LanguageType languageType) {
         LOGGER.info("Adding sub category: {}", categoryRequestDTO);
+        Category category = categoryService.findById(categoryRequestDTO.getCategoryId(), languageType);
+        validateSubCategoryNameUnique(categoryRequestDTO.getName(), categoryRequestDTO.getArabicName(), category, null, languageType);
         SubCategory subCategory = SubCategory.fromDTO(categoryRequestDTO);
-        subCategory.setCategory(categoryService.findById(categoryRequestDTO.getCategoryId(), languageType));
+        subCategory.setCategory(category);
         save(subCategory);
     }
 
@@ -161,14 +164,43 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     public SubCategory updateSubCategory(SubCategoryRequestDTO subCategoryRequestDTO, LanguageType languageType) {
         LOGGER.info("Updating sub category: {}", subCategoryRequestDTO);
         SubCategory existingSubCategory = findById(subCategoryRequestDTO.getId(), languageType);
-        existingSubCategory.setName(subCategoryRequestDTO.getName() == null ? existingSubCategory.getName() : subCategoryRequestDTO.getName());
-        existingSubCategory.setArabicName(subCategoryRequestDTO.getName() == null ? existingSubCategory.getName() : subCategoryRequestDTO.getName());
+        Category category = subCategoryRequestDTO.getCategoryId() == null
+                ? existingSubCategory.getCategory()
+                : categoryService.findById(subCategoryRequestDTO.getCategoryId(), languageType);
+
+        String newName = subCategoryRequestDTO.getName() == null ? existingSubCategory.getName() : subCategoryRequestDTO.getName();
+        String newArabicName = subCategoryRequestDTO.getArabicName() == null ? existingSubCategory.getArabicName() : subCategoryRequestDTO.getArabicName();
+        validateSubCategoryNameUnique(newName, newArabicName, category, existingSubCategory.getId(), languageType);
+
+        existingSubCategory.setName(newName);
+        existingSubCategory.setArabicName(newArabicName);
         existingSubCategory.setImage(subCategoryRequestDTO.getImage() == null ? existingSubCategory.getImage() : subCategoryRequestDTO.getImage());
         existingSubCategory.setLevel(subCategoryRequestDTO.getLevel() == null ? existingSubCategory.getLevel() : subCategoryRequestDTO.getLevel());
         existingSubCategory.setPosition(subCategoryRequestDTO.getPosition() == null ? existingSubCategory.getPosition() : subCategoryRequestDTO.getPosition());
         existingSubCategory.setStatus(subCategoryRequestDTO.getStatus() == null ? existingSubCategory.getStatus() : subCategoryRequestDTO.getStatus());
-        existingSubCategory.setCategory(categoryService.findById(subCategoryRequestDTO.getCategoryId(), languageType) == null ? existingSubCategory.getCategory() : categoryService.findById(subCategoryRequestDTO.getCategoryId(), languageType));
+        existingSubCategory.setCategory(category);
         return save(existingSubCategory);
+    }
+
+    private void validateSubCategoryNameUnique(String name, String arabicName, Category category,
+                                               Long excludeId, LanguageType languageType) {
+        boolean arabic = LanguageType.ARB.equals(languageType);
+        if (name != null && !name.trim().isEmpty()) {
+            boolean exists = excludeId == null
+                    ? subCategoryRepository.existsByNameIgnoreCaseAndCategory(name.trim(), category)
+                    : subCategoryRepository.existsByNameIgnoreCaseAndCategoryAndIdNot(name.trim(), category, excludeId);
+            if (exists) {
+                throw new DuplicateResourceException(arabic ? SUB_CATEGORY_NAME_EXISTS_ARABIC : SUB_CATEGORY_NAME_EXISTS);
+            }
+        }
+        if (arabicName != null && !arabicName.trim().isEmpty()) {
+            boolean exists = excludeId == null
+                    ? subCategoryRepository.existsByArabicNameIgnoreCaseAndCategory(arabicName.trim(), category)
+                    : subCategoryRepository.existsByArabicNameIgnoreCaseAndCategoryAndIdNot(arabicName.trim(), category, excludeId);
+            if (exists) {
+                throw new DuplicateResourceException(arabic ? SUB_CATEGORY_ARABIC_NAME_EXISTS_ARABIC : SUB_CATEGORY_ARABIC_NAME_EXISTS);
+            }
+        }
     }
 
     @Override

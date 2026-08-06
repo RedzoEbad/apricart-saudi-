@@ -1,6 +1,7 @@
 package com.apricart.consumer.service.Impl;
 
 import com.apricart.consumer.enity.*;
+import com.apricart.consumer.exceptions.DuplicateResourceException;
 import com.apricart.consumer.exceptions.ResourceNotFoundException;
 import com.apricart.consumer.generic.Response;
 import com.apricart.consumer.repository.jpa.ProductRepository;
@@ -62,9 +63,13 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void addProduct(ProductRequestDTO productRequestDTO, LanguageType languageType) {
         LOGGER.info("Adding product: {}", productRequestDTO.toString());
+        SubCategory subCategory = subCategoryService.findById(productRequestDTO.getSubCategoryId(), languageType);
+        validateProductUnique(productRequestDTO.getTitle(), productRequestDTO.getArabicTitle(),
+                productRequestDTO.getSku(), subCategory, null, languageType);
+
         Product product = Product.fromDTO(productRequestDTO);
         product.setCategory(categoryService.findById(productRequestDTO.getCategoryId(), languageType));
-        product.setSubCategory(subCategoryService.findById(productRequestDTO.getSubCategoryId(), languageType));
+        product.setSubCategory(subCategory);
         product.setBrand(brandService.findById(productRequestDTO.getBrandId(), languageType));
         Product savedProduct = save(product);
 
@@ -75,15 +80,24 @@ public class ProductServiceImpl implements ProductService {
     public Product updateProduct(ProductRequestDTO productRequestDTO, LanguageType languageType) {
         LOGGER.info("Updating product: {}", productRequestDTO);
         Product existingProduct = findById(productRequestDTO.getId(),languageType);
-        existingProduct.setTitle(productRequestDTO.getTitle() == null ? existingProduct.getTitle() : productRequestDTO.getTitle());
-        existingProduct.setArabicTitle(productRequestDTO.getArabicTitle() == null ? existingProduct.getArabicTitle() : productRequestDTO.getArabicTitle());
+        SubCategory subCategory = productRequestDTO.getSubCategoryId() == null
+                ? existingProduct.getSubCategory()
+                : subCategoryService.findById(productRequestDTO.getSubCategoryId(), languageType);
+
+        String newTitle = productRequestDTO.getTitle() == null ? existingProduct.getTitle() : productRequestDTO.getTitle();
+        String newArabicTitle = productRequestDTO.getArabicTitle() == null ? existingProduct.getArabicTitle() : productRequestDTO.getArabicTitle();
+        String newSku = productRequestDTO.getSku() == null ? existingProduct.getSku() : productRequestDTO.getSku();
+        validateProductUnique(newTitle, newArabicTitle, newSku, subCategory, existingProduct.getId(), languageType);
+
+        existingProduct.setTitle(newTitle);
+        existingProduct.setArabicTitle(newArabicTitle);
         existingProduct.setImage(productRequestDTO.getImage() == null ? existingProduct.getImage() : productRequestDTO.getImage());
         existingProduct.setDescription(productRequestDTO.getDescription() == null ? existingProduct.getDescription() : productRequestDTO.getDescription());
         existingProduct.setArabicDescription(productRequestDTO.getArabicDescription() == null ? existingProduct.getArabicDescription() : productRequestDTO.getArabicDescription());
-        existingProduct.setSku(productRequestDTO.getSku() == null ? existingProduct.getSku() : productRequestDTO.getSku());
+        existingProduct.setSku(newSku);
         existingProduct.setWeight(productRequestDTO.getWeight() == null ? existingProduct.getWeight() : productRequestDTO.getWeight());
         existingProduct.setCategory(productRequestDTO.getCategoryId() == null ? existingProduct.getCategory() : categoryService.findById(productRequestDTO.getCategoryId(), languageType));
-        existingProduct.setSubCategory(productRequestDTO.getSubCategoryId() == null ? existingProduct.getSubCategory() : subCategoryService.findById(productRequestDTO.getSubCategoryId(), languageType));
+        existingProduct.setSubCategory(subCategory);
         existingProduct.setBrand(productRequestDTO.getBrandId() == null ? existingProduct.getBrand() : brandService.findById(productRequestDTO.getBrandId(), languageType));
         existingProduct.setPosition(productRequestDTO.getPosition() == null ? existingProduct.getPosition() : productRequestDTO.getPosition());
         existingProduct.setIsFeatured(productRequestDTO.getIsFeatured() == null ? existingProduct.getIsFeatured() : productRequestDTO.getIsFeatured());
@@ -109,6 +123,35 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return existingProduct;
+    }
+
+    private void validateProductUnique(String title, String arabicTitle, String sku, SubCategory subCategory,
+                                       Long excludeId, LanguageType languageType) {
+        boolean arabic = LanguageType.ARB.equals(languageType);
+        if (title != null && !title.trim().isEmpty()) {
+            boolean exists = excludeId == null
+                    ? productRepository.existsByTitleIgnoreCaseAndSubCategory(title.trim(), subCategory)
+                    : productRepository.existsByTitleIgnoreCaseAndSubCategoryAndIdNot(title.trim(), subCategory, excludeId);
+            if (exists) {
+                throw new DuplicateResourceException(arabic ? PRODUCT_TITLE_EXISTS_ARABIC : PRODUCT_TITLE_EXISTS);
+            }
+        }
+        if (arabicTitle != null && !arabicTitle.trim().isEmpty()) {
+            boolean exists = excludeId == null
+                    ? productRepository.existsByArabicTitleIgnoreCaseAndSubCategory(arabicTitle.trim(), subCategory)
+                    : productRepository.existsByArabicTitleIgnoreCaseAndSubCategoryAndIdNot(arabicTitle.trim(), subCategory, excludeId);
+            if (exists) {
+                throw new DuplicateResourceException(arabic ? PRODUCT_ARABIC_TITLE_EXISTS_ARABIC : PRODUCT_ARABIC_TITLE_EXISTS);
+            }
+        }
+        if (sku != null && !sku.trim().isEmpty()) {
+            boolean exists = excludeId == null
+                    ? productRepository.existsBySkuIgnoreCase(sku.trim())
+                    : productRepository.existsBySkuIgnoreCaseAndIdNot(sku.trim(), excludeId);
+            if (exists) {
+                throw new DuplicateResourceException(arabic ? PRODUCT_SKU_EXISTS_ARABIC : PRODUCT_SKU_EXISTS);
+            }
+        }
     }
 
     private void createMissingWarehouseEntriesForProduct(Product product) {

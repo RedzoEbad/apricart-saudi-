@@ -12,4 +12,9 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     Category findCategoryByArabicName(String arabicName);
     List<Category> findCategoryByLevel(LevelType level);
     List<Category> findAllByIsDiscountedCategory(Boolean isDiscountedCategory);
+
+    boolean existsByNameIgnoreCase(String name);
+    boolean existsByArabicNameIgnoreCase(String arabicName);
+    boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
+    boolean existsByArabicNameIgnoreCaseAndIdNot(String arabicName, Long id);
 }

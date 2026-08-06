@@ -17,7 +17,10 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "PRODUCT")
+@Table(name = "PRODUCT", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_product_subcategory_title", columnNames = {"sub_category_id", "title"}),
+        @UniqueConstraint(name = "uk_product_subcategory_arabic_title", columnNames = {"sub_category_id", "arabic_title"})
+})
 @Indexed
 public class Product extends BaseEntity {
 

@@ -102,7 +102,7 @@ public class CategoryController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
             @Valid @RequestBody CategoryRequestDTO categoryRequestDTO,
             @RequestHeader("Language") LanguageType lang) {
-        categoryService.addCategory(categoryRequestDTO);
+        categoryService.addCategory(categoryRequestDTO, lang);
         return Response.created();
     }
 

@@ -1,15 +1,13 @@
 package com.apricart.consumer.exceptions;
 
 import com.apricart.consumer.generic.GenericResponse;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
-
-import java.time.LocalDateTime;
 
 /**
  * Created on January, 2024
@@ -18,6 +16,32 @@ import java.time.LocalDateTime;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<GenericResponse<String>> handleDuplicateResourceException(DuplicateResourceException ex) {
+        GenericResponse<String> response = new GenericResponse<>(HttpStatus.CONFLICT.value(), ex.getMessage(), null);
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<GenericResponse<String>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        String message = "A record with the same unique value already exists";
+        String cause = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : "";
+        if (cause != null) {
+            String lower = cause.toLowerCase();
+            if (lower.contains("sub_category") || lower.contains("subcategory")) {
+                message = "A subcategory with this name already exists in this category";
+            } else if (lower.contains("category")) {
+                message = "A category with this name already exists";
+            } else if (lower.contains("product") && lower.contains("sku")) {
+                message = "A product with this SKU already exists";
+            } else if (lower.contains("product")) {
+                message = "A product with this name already exists in this subcategory";
+            }
+        }
+        GenericResponse<String> response = new GenericResponse<>(HttpStatus.CONFLICT.value(), message, null);
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
 
     @ExceptionHandler({RegistrationException.class, BadCredentialsException.class, Exception.class})
     public ResponseEntity<GenericResponse<String>> handleException(Exception exception) {

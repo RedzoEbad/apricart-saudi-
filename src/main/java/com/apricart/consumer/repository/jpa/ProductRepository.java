@@ -21,6 +21,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findProductByIsDiscounted(Boolean isDiscounted, Pageable pageable);
     Long findTopByOrderByIdDesc();
 
+    boolean existsByTitleIgnoreCaseAndSubCategory(String title, SubCategory subCategory);
+    boolean existsByArabicTitleIgnoreCaseAndSubCategory(String arabicTitle, SubCategory subCategory);
+    boolean existsByTitleIgnoreCaseAndSubCategoryAndIdNot(String title, SubCategory subCategory, Long id);
+    boolean existsByArabicTitleIgnoreCaseAndSubCategoryAndIdNot(String arabicTitle, SubCategory subCategory, Long id);
+    boolean existsBySkuIgnoreCase(String sku);
+    boolean existsBySkuIgnoreCaseAndIdNot(String sku, Long id);
+
     @Query("SELECT DISTINCT pw.product FROM OrderItem oi JOIN oi.productWarehouse pw")
     Page<Product> findOrderedProducts(Pageable pageable);
 

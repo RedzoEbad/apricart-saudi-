@@ -22,7 +22,7 @@ public interface CategoryService {
     String getCategoryImage(Long id, LanguageType languageType);
     Category updateCategoryLevelById(Long id, LevelType level, LanguageType languageType);
     Category updateCategoryPosition(Long id, Integer position, LanguageType languageType);
-    void addCategory(CategoryRequestDTO categoryRequestDTO);
+    void addCategory(CategoryRequestDTO categoryRequestDTO, LanguageType languageType);
     Category updateCategory(CategoryRequestDTO categoryRequestDTO, LanguageType languageType);
     void deleteCategory(Long id, LanguageType languageType);
     ResponseEntity<?> addOrUpdateCategoryImage(Long categoryId, MultipartFile image, Customer customer, LanguageType lang);

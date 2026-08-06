@@ -58,9 +58,13 @@ public class ResponseMessage {
     public static final String CATEGORY_REMOVED_SUCCESSFULLY = "Category removed successfully";
     public static final String CATEGORY_NOT_FOUND = "Category not found";
     public static final String CATEGORY_STATUS_NOT_ACTIVE = "Category not active";
+    public static final String CATEGORY_NAME_EXISTS = "A category with this name already exists";
+    public static final String CATEGORY_ARABIC_NAME_EXISTS = "A category with this Arabic name already exists";
     //SubCategory
     public static final String SUB_CATEGORY_REMOVED_SUCCESSFULLY = "Sub Category removed successfully";
     public static final String SUB_CATEGORY_NOT_FOUND = "Sub Category not found";
+    public static final String SUB_CATEGORY_NAME_EXISTS = "A subcategory with this name already exists in this category";
+    public static final String SUB_CATEGORY_ARABIC_NAME_EXISTS = "A subcategory with this Arabic name already exists in this category";
     //Warehouse
     public static final String WAREHOUSE_REMOVED_SUCCESSFULLY = "Warehouse removed successfully";
     public static final String WAREHOUSE_NOT_ACTIVE = "Warehouse not active";
@@ -81,6 +85,9 @@ public class ResponseMessage {
     public static final String FEATURED_PRODUCT_NOT_FOUND = "No featured product found";
     public static final String NEW_ARRIVAL_PRODUCT_NOT_FOUND = "No new arrival product found";
     public static final String PRODUCT_NULL = "Product must not be null";
+    public static final String PRODUCT_TITLE_EXISTS = "A product with this name already exists in this subcategory";
+    public static final String PRODUCT_ARABIC_TITLE_EXISTS = "A product with this Arabic name already exists in this subcategory";
+    public static final String PRODUCT_SKU_EXISTS = "A product with this SKU already exists";
     public static final String PRICE_LIST_NULL = "PriceList must not be null";
     public static final String TAX_NULL = "Tax must not be null";
     public static final String CATEGORY_NULL = "Category must not be null";

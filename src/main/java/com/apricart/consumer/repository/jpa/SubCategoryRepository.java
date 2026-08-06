@@ -21,4 +21,9 @@ public interface SubCategoryRepository extends JpaRepository<SubCategory, Long> 
             "WHERE sc.category = :category " +
             "OR sc.category.isDiscountedCategory = true " )
     List<SubCategory> findDiscountedSubCategoriesByCategory(@Param("category") Category category);
+
+    boolean existsByNameIgnoreCaseAndCategory(String name, Category category);
+    boolean existsByArabicNameIgnoreCaseAndCategory(String arabicName, Category category);
+    boolean existsByNameIgnoreCaseAndCategoryAndIdNot(String name, Category category, Long id);
+    boolean existsByArabicNameIgnoreCaseAndCategoryAndIdNot(String arabicName, Category category, Long id);
 }

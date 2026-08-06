@@ -58,9 +58,13 @@ public class ArabicResponseMessages {
     public static final String CATEGORY_REMOVED_SUCCESSFULLY_ARABIC = "تمت إزالة الفئة بنجاح";
     public static final String CATEGORY_NOT_FOUND_ARABIC = "لم يتم العثور على الفئة.";
     public static final String CATEGORY_STATUS_NOT_ACTIVE_ARABIC = "الفئة غير نشطة.";
+    public static final String CATEGORY_NAME_EXISTS_ARABIC = "يوجد بالفعل فئة بهذا الاسم";
+    public static final String CATEGORY_ARABIC_NAME_EXISTS_ARABIC = "يوجد بالفعل فئة بهذا الاسم العربي";
     // الفئة الفرعية
     public static final String SUB_CATEGORY_REMOVED_SUCCESSFULLY_ARABIC = "تمت إزالة الفئة الفرعية بنجاح";
     public static final String SUB_CATEGORY_NOT_FOUND_ARABIC = "لم يتم العثور على الفئة.";
+    public static final String SUB_CATEGORY_NAME_EXISTS_ARABIC = "يوجد بالفعل فئة فرعية بهذا الاسم ضمن هذه الفئة";
+    public static final String SUB_CATEGORY_ARABIC_NAME_EXISTS_ARABIC = "يوجد بالفعل فئة فرعية بهذا الاسم العربي ضمن هذه الفئة";
 
     // المستودع
     public static final String WAREHOUSE_REMOVED_SUCCESSFULLY_ARABIC = "تمت إزالة المستودع بنجاح";
@@ -84,6 +88,9 @@ public class ArabicResponseMessages {
     public static final String FEATURED_PRODUCT_NOT_FOUND_ARABIC = "لم يتم العثور على منتج مميز";
     public static final String NEW_ARRIVAL_PRODUCT_NOT_FOUND_ARABIC = "لم يتم العثور على منتج واصل جديد";
     public static final String PRODUCT_NULL_ARABIC = "يجب ألا يكون المنتج فارغًا";
+    public static final String PRODUCT_TITLE_EXISTS_ARABIC = "يوجد بالفعل منتج بهذا الاسم ضمن هذه الفئة الفرعية";
+    public static final String PRODUCT_ARABIC_TITLE_EXISTS_ARABIC = "يوجد بالفعل منتج بهذا الاسم العربي ضمن هذه الفئة الفرعية";
+    public static final String PRODUCT_SKU_EXISTS_ARABIC = "يوجد بالفعل منتج بهذا الرمز (SKU)";
     public static final String PRICE_LIST_NULL_ARABIC = "يجب ألا تكون قائمة الأسعار فارغة";
     public static final String TAX_NULL_ARABIC = "يجب ألا يكون الضريبة فارغة";
     public static final String CATEGORY_NULL_ARABIC = "يجب ألا تكون الفئة فارغة";

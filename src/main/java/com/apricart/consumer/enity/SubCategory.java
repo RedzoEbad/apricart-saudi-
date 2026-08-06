@@ -22,17 +22,20 @@ import java.util.stream.Collectors;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "SUB_CATEGORY")
+@Table(name = "SUB_CATEGORY", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_subcategory_category_name", columnNames = {"category_id", "name"}),
+        @UniqueConstraint(name = "uk_subcategory_category_arabic_name", columnNames = {"category_id", "arabic_name"})
+})
 public class SubCategory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column
     private String name;
 
-    @Column(unique = true)
+    @Column
     private String arabicName;
 
     @Enumerated(EnumType.STRING)

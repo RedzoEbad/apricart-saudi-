@@ -2,6 +2,7 @@ package com.apricart.consumer.service.Impl;
 
 import com.apricart.consumer.enity.Category;
 import com.apricart.consumer.enity.Customer;
+import com.apricart.consumer.exceptions.DuplicateResourceException;
 import com.apricart.consumer.exceptions.ResourceNotFoundException;
 import com.apricart.consumer.generic.Response;
 import com.apricart.consumer.repository.jpa.CategoryRepository;
@@ -138,8 +139,9 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void addCategory(CategoryRequestDTO categoryRequestDTO) {
+    public void addCategory(CategoryRequestDTO categoryRequestDTO, LanguageType languageType) {
         LOGGER.info("Adding category: {}", categoryRequestDTO);
+        validateCategoryNameUnique(categoryRequestDTO.getName(), categoryRequestDTO.getArabicName(), null, languageType);
         save(Category.fromDTO(categoryRequestDTO));
     }
 
@@ -153,12 +155,37 @@ public class CategoryServiceImpl implements CategoryService {
         LOGGER.info("Updating category: {}", categoryRequestDTO);
         Category existingCategory = findById(categoryRequestDTO.getId(), languageType);
 
-        existingCategory.setName(categoryRequestDTO.getName() == null ? existingCategory.getName() : categoryRequestDTO.getName());
+        String newName = categoryRequestDTO.getName() == null ? existingCategory.getName() : categoryRequestDTO.getName();
+        String newArabicName = categoryRequestDTO.getArabicName() == null ? existingCategory.getArabicName() : categoryRequestDTO.getArabicName();
+        validateCategoryNameUnique(newName, newArabicName, existingCategory.getId(), languageType);
+
+        existingCategory.setName(newName);
+        existingCategory.setArabicName(newArabicName);
         existingCategory.setImage(categoryRequestDTO.getImage() == null ? existingCategory.getImage() : categoryRequestDTO.getImage());
         existingCategory.setLevel(categoryRequestDTO.getLevel() == null ? existingCategory.getLevel() : categoryRequestDTO.getLevel());
         existingCategory.setPosition(categoryRequestDTO.getPosition() == null ? existingCategory.getPosition() : categoryRequestDTO.getPosition());
         existingCategory.setStatus(categoryRequestDTO.getStatus() == null ? existingCategory.getStatus() : categoryRequestDTO.getStatus());
         return save(existingCategory);
+    }
+
+    private void validateCategoryNameUnique(String name, String arabicName, Long excludeId, LanguageType languageType) {
+        boolean arabic = LanguageType.ARB.equals(languageType);
+        if (name != null && !name.trim().isEmpty()) {
+            boolean exists = excludeId == null
+                    ? categoryRepository.existsByNameIgnoreCase(name.trim())
+                    : categoryRepository.existsByNameIgnoreCaseAndIdNot(name.trim(), excludeId);
+            if (exists) {
+                throw new DuplicateResourceException(arabic ? CATEGORY_NAME_EXISTS_ARABIC : CATEGORY_NAME_EXISTS);
+            }
+        }
+        if (arabicName != null && !arabicName.trim().isEmpty()) {
+            boolean exists = excludeId == null
+                    ? categoryRepository.existsByArabicNameIgnoreCase(arabicName.trim())
+                    : categoryRepository.existsByArabicNameIgnoreCaseAndIdNot(arabicName.trim(), excludeId);
+            if (exists) {
+                throw new DuplicateResourceException(arabic ? CATEGORY_ARABIC_NAME_EXISTS_ARABIC : CATEGORY_ARABIC_NAME_EXISTS);
+            }
+        }
     }
 
     @Override
