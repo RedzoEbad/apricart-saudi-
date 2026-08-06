@@ -122,7 +122,8 @@ public class Product extends BaseEntity {
         return products.stream()
                 .map(Product::toDTO)
                 .filter(dto -> dto.getPosition() != null)
-                .sorted(Comparator.comparing(ProductResponseDTO::getPosition))
+                .sorted(Comparator.comparing(ProductResponseDTO::getPosition,
+                        Comparator.nullsLast(Comparator.naturalOrder())))
                 .collect(Collectors.toList());
     }
 
@@ -140,7 +141,7 @@ public class Product extends BaseEntity {
                 .isFeatured(dto.getIsFeatured())
                 .isNewArrivals(dto.getIsNewArrivals())
                 .isTrending(dto.getIsTrending())
-                .position(dto.getPosition())
+                .position(dto.getPosition() != null ? dto.getPosition() : 0)
                 .image(dto.getImage())
                 .isActive(dto.getIsActive())
                 .zohoId(dto.getZohoId())
