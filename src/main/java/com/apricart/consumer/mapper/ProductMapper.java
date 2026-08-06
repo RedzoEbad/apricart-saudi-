@@ -45,10 +45,13 @@ public class ProductMapper {
     public List<ProductDetailDTO> mapAndSortProductDetails(List<ProductWarehouseResponseDTO> productWarehouses, Long customerId, LanguageType languageType) {
         java.util.Map<Long, TaxResponseDTO> taxCache = new java.util.HashMap<>();
         List<ProductDetailDTO> filteredProducts =  productWarehouses.stream()
+                .filter(pw -> pw != null && pw.getProduct() != null)
                 .filter(pw -> Optional.ofNullable(pw.getProduct().getIsActive()).orElse(false))
-                .filter(pw -> Optional.ofNullable(pw.getInStock()).orElse(false) && Optional.of(pw.getQuantityInStock() > 0).orElse(false))
+                .filter(pw -> Optional.ofNullable(pw.getInStock()).orElse(false)
+                        && Optional.ofNullable(pw.getQuantityInStock()).orElse(0) > 0)
                 .map(pw -> mapToProductDetailDTO(pw, customerId, languageType, taxCache))
-                .sorted(Comparator.comparing(ProductDetailDTO::getPosition))
+                .sorted(Comparator.comparing(ProductDetailDTO::getPosition,
+                        Comparator.nullsLast(Comparator.naturalOrder())))
                 .collect(Collectors.toList());
 
         if (filteredProducts.isEmpty()) {
@@ -191,7 +194,18 @@ public class ProductMapper {
 
 
     private double calculateDiscountedPrice(String currentRate, String specialRate) {
-        return Double.parseDouble(specialRate) != 0.0 ? (Double.parseDouble(currentRate) - Double.parseDouble(specialRate)) : 0.0;
+        try {
+            if (currentRate == null || currentRate.trim().isEmpty()
+                    || specialRate == null || specialRate.trim().isEmpty()) {
+                return 0.0;
+            }
+            double current = Double.parseDouble(currentRate);
+            double special = Double.parseDouble(specialRate);
+            return special != 0.0 ? (current - special) : 0.0;
+        } catch (NumberFormatException e) {
+            LOGGER.warn("Invalid rate values currentRate={}, specialRate={}", currentRate, specialRate);
+            return 0.0;
+        }
     }
     private String appendPercentSign(String percentage) {
         return percentage != null && !percentage.trim().isEmpty() ? percentage + PERCENT_SIGN : null;
@@ -250,14 +264,14 @@ public class ProductMapper {
                 .inStock(productWarehouse.getInStock())
                 .product(toProductDTO(productWarehouse, languageType))
                 .rate(productWarehouse.getRate())
-                .taxId(productWarehouse.getTax().getId())
+                .taxId(productWarehouse.getTax() != null ? productWarehouse.getTax().getId() : null)
                 .quantityInStock(productWarehouse.getQuantityInStock())
-                .warehouseId(productWarehouse.getWarehouse().getId())
+                .warehouseId(productWarehouse.getWarehouse() != null ? productWarehouse.getWarehouse().getId() : null)
                 .specialRate(productWarehouse.getSpecialRate())
-                .priceListId(productWarehouse.getPriceList().getId())
-                .categoryId(productWarehouse.getCategory().getId())
+                .priceListId(productWarehouse.getPriceList() != null ? productWarehouse.getPriceList().getId() : null)
+                .categoryId(productWarehouse.getCategory() != null ? productWarehouse.getCategory().getId() : null)
                 .discountPercentage(productWarehouse.getDiscountPercentage())
-                .subCategoryId(productWarehouse.getSubCategory().getId())
+                .subCategoryId(productWarehouse.getSubCategory() != null ? productWarehouse.getSubCategory().getId() : null)
                 .isActive(productWarehouse.getIsActive())
                 .build();
     }

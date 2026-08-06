@@ -63,17 +63,34 @@ public class HomeServiceImpl implements HomeService {
                 LOGGER.warn("Could not fetch active banners for home aggregated response: {}", e.getMessage());
             }
 
+            List<Category> categories = Collections.emptyList();
+            try {
+                categories = productWarehouseService.findCategoriesByWarehouseId(warehouseId);
+            } catch (Exception e) {
+                LOGGER.warn("Could not fetch categories for home warehouse {}: {}", warehouseId, e.getMessage());
+            }
+
             return HomeDTO.builder()
-                    .categories(Category.toDTOList(productWarehouseService.findCategoriesByWarehouseId(warehouseId)))
-                    .newArrivals(handleProductMapping(newArrivals, customerId, lang))
-                    .trending(handleProductMapping(trending, customerId, lang))
-                    .recommended(handleProductMapping(recommended, customerId, lang))
+                    .categories(Category.toDTOList(categories))
+                    .newArrivals(safeMapProducts(newArrivals, customerId, lang, "newArrivals"))
+                    .trending(safeMapProducts(trending, customerId, lang, "trending"))
+                    .recommended(safeMapProducts(recommended, customerId, lang, "recommended"))
                     .brands(Brand.toDTOList(activeBrands))
                     .banners(Banner.toDTOList(activeBanners))
                     .build();
         } catch (Exception e) {
             LOGGER.error("Error occurred while fetching home details by warehouse id: {}", warehouseId, e);
             throw new ResourceNotFoundException(LanguageType.ARB.equals(lang) ? HOME_DETAILS_FAILED_ARABIC : HOME_DETAILS_FAILED, true);
+        }
+    }
+
+    private List<ProductDetailDTO> safeMapProducts(List<ProductWarehouseResponseDTO> products, Long customerId,
+                                                   LanguageType lang, String section) {
+        try {
+            return handleProductMapping(products, customerId, lang);
+        } catch (Exception e) {
+            LOGGER.warn("Skipping home section '{}' for warehouse mapping failure: {}", section, e.getMessage());
+            return Collections.emptyList();
         }
     }
 
