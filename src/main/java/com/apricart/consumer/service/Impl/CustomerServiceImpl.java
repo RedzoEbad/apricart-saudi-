@@ -1,13 +1,23 @@
 package com.apricart.consumer.service.Impl;
 
 import com.apricart.consumer.enity.City;
+import com.apricart.consumer.enity.CouponDetail;
 import com.apricart.consumer.enity.Customer;
+import com.apricart.consumer.enity.CustomerAddress;
+import com.apricart.consumer.enity.FeedBack;
 import com.apricart.consumer.enity.Otp;
 import com.apricart.consumer.exceptions.RegistrationException;
 import com.apricart.consumer.exceptions.ResourceNotFoundException;
 import com.apricart.consumer.generic.GenericResponse;
 import com.apricart.consumer.generic.Response;
+import com.apricart.consumer.repository.jpa.CartRepository;
+import com.apricart.consumer.repository.jpa.CouponDetailRepository;
+import com.apricart.consumer.repository.jpa.CustomerAddressRepository;
 import com.apricart.consumer.repository.jpa.CustomerRepository;
+import com.apricart.consumer.repository.jpa.FeedBackRepository;
+import com.apricart.consumer.repository.jpa.MissingProductRepository;
+import com.apricart.consumer.repository.jpa.OtpRepository;
+import com.apricart.consumer.repository.jpa.WishListRepository;
 import com.apricart.consumer.security.dto.dto.AuthenticatedUserDto;
 import com.apricart.consumer.security.dto.dto.OTPRequest;
 import com.apricart.consumer.security.dto.request.ForgotPasswordRequest;
@@ -32,12 +42,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static com.apricart.consumer.security.constants.ArabicResponseMessages.*;
 import static com.apricart.consumer.security.constants.Constants.EMAIL_SUBJECT_PASSWORD_RESET;
@@ -79,6 +91,27 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     OTPService otpService;
+
+    @Autowired
+    CartRepository cartRepository;
+
+    @Autowired
+    WishListRepository wishListRepository;
+
+    @Autowired
+    CustomerAddressRepository customerAddressRepository;
+
+    @Autowired
+    MissingProductRepository missingProductRepository;
+
+    @Autowired
+    CouponDetailRepository couponDetailRepository;
+
+    @Autowired
+    FeedBackRepository feedBackRepository;
+
+    @Autowired
+    OtpRepository otpRepository;
 
     @Override
     public Customer findByPhoneNumber(String phoneNumber) {
@@ -295,6 +328,79 @@ public class CustomerServiceImpl implements CustomerService {
             log.error("Exception occurred during password update", e);
             return lang.equals(LanguageType.ARB) ? Response.error(PASSWORD_UPDATE_FAILURE_MESSAGE_ARABIC)
                     : Response.error(PASSWORD_UPDATE_FAILURE_MESSAGE);
+        }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public ResponseEntity<?> deleteAccount(Customer customer, LanguageType lang) {
+        try {
+            if (customer == null || customer.getId() == null) {
+                return lang.equals(LanguageType.ARB) ? Response.notFound(ACCOUNT_NOT_FOUND_ARABIC)
+                        : Response.notFound(ACCOUNT_NOT_FOUND);
+            }
+
+            Long customerId = customer.getId();
+            String phoneNumber = customer.getPhoneNumber();
+
+            cartRepository.deleteByCustomer(customer);
+            wishListRepository.deleteByCustomer(customer);
+            missingProductRepository.deleteByCustomerId(customerId);
+
+            List<CustomerAddress> addresses = customerAddressRepository.findByCustomerId(customerId);
+            for (CustomerAddress address : addresses) {
+                address.setActive(false);
+                address.setAddressDetail(null);
+                address.setAddressLatitude(null);
+                address.setAddressLongitude(null);
+                customerAddressRepository.save(address);
+            }
+
+            if (StringUtils.isNotBlank(phoneNumber)) {
+                otpRepository.deleteByPhoneNumber(phoneNumber);
+                List<FeedBack> feedbacks = feedBackRepository.findByPhoneNumber(phoneNumber);
+                for (FeedBack feedback : feedbacks) {
+                    feedback.setName("Deleted User");
+                    feedback.setPhoneNumber("deleted_" + customerId);
+                    feedback.setEmail("deleted_" + customerId + "@deleted.invalid");
+                    feedBackRepository.save(feedback);
+                }
+            }
+
+            List<CouponDetail> couponDetails = couponDetailRepository.findByCustomerId(customerId);
+            for (CouponDetail couponDetail : couponDetails) {
+                couponDetail.setPhoneNumber("deleted_" + customerId);
+                couponDetailRepository.save(couponDetail);
+            }
+
+            String deletedMarker = "deleted_" + customerId;
+            customer.setName("Deleted User");
+            customer.setArabicName("مستخدم محذوف");
+            customer.setUsername(deletedMarker);
+            customer.setEmail(deletedMarker + "@deleted.invalid");
+            customer.setPhoneNumber(deletedMarker);
+            customer.setPassword(bCryptPasswordEncoder.encode(UUID.randomUUID().toString()));
+            customer.setAccessToken(null);
+            customer.setIsActive(false);
+            customer.setIpAddress(null);
+            customer.setTradelicense(null);
+            customer.setTypeOfBusiness(null);
+            customer.setCustomerId(null);
+            customer.setSalePerson(null);
+            customer.setCity(null);
+            customer.setUpdateDateTime(LocalDateTime.now());
+            customerRepository.save(customer);
+
+            LOGGER.info("Deleted account for customer id {}", customerId);
+            return lang.equals(LanguageType.ARB)
+                    ? Response.success(ACCOUNT_DELETED_SUCCESSFULLY_ARABIC)
+                    : Response.success(ACCOUNT_DELETED_SUCCESSFULLY);
+        } catch (Exception e) {
+            LOGGER.error("Failed to delete account for customer {}",
+                    customer != null ? customer.getId() : null, e);
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return lang.equals(LanguageType.ARB) ? Response.error(ACCOUNT_DELETE_FAILED_ARABIC)
+                    : Response.error(ACCOUNT_DELETE_FAILED);
         }
     }
 }

@@ -24,5 +24,6 @@ public interface CustomerService {
 	ResponseEntity<?> registration(RegistrationRequest registrationRequest, LanguageType lang);
 	ResponseEntity<?> forgotPassword(ForgotPasswordRequest otpVerifyRequest, LanguageType lang);
 	ResponseEntity<?> updatePassword(UpdatePasswordRequest updatePasswordRequest, Customer user, LanguageType lang);
+	ResponseEntity<?> deleteAccount(Customer user, LanguageType lang);
 	AuthenticatedUserDto findAuthenticatedUserByUsername(String username);
 }

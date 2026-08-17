@@ -14,6 +14,8 @@ public interface OtpRepository extends CrudRepository<Otp, Long> {
 
     Optional<Otp> findByPhoneNumber(String phoneNumber);
 
+    void deleteByPhoneNumber(String phoneNumber);
+
     @Query("SELECT o.otp FROM Otp o WHERE o.phoneNumber = ?1")
     String findOtpByPhoneNumber(String phoneNumber);
 

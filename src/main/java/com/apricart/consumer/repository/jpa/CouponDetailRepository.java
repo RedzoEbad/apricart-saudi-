@@ -11,6 +11,7 @@ public interface CouponDetailRepository extends JpaRepository<CouponDetail, Long
     CouponDetail findByCoupon(Coupon coupon);
     List<CouponDetail> findByWarehouseId(Long warehouseId);
     List<CouponDetail> findByOrderId(String orderId);
+    List<CouponDetail> findByCustomerId(Long customerId);
     Integer countByCustomerIdAndCoupon(Long customerId, Coupon coupon);
     Integer countByCustomerIdAndPhoneNumberAndCoupon(Long customerId, String phoneNumber, Coupon coupon);
 

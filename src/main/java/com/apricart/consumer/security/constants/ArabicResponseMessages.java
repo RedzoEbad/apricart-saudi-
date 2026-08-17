@@ -22,6 +22,8 @@ public class ArabicResponseMessages {
     public static final String OTP_NOT_FOUND_ARABIC = "عذرًا، رمز المرور المؤقت غير موجود.";
     public static final String PASSWORD_RESET_FAILED_ARABIC = "عذرًا، فشلت إعادة تعيين كلمة المرور.";
     public static final String ACCOUNT_NOT_FOUND_ARABIC = "الحساب غير موجود.";
+    public static final String ACCOUNT_DELETED_SUCCESSFULLY_ARABIC = "تم حذف حسابك بنجاح.";
+    public static final String ACCOUNT_DELETE_FAILED_ARABIC = "فشل حذف الحساب. يرجى المحاولة مرة أخرى لاحقًا.";
     public static final String PASSWORD_UPDATED_SUCCESS_ARABIC = "لقد قمت بتعيين كلمة مرور جديدة بنجاح.";
     public static final String OTP_SEND_FAILURE_ARABIC = "فشل في إرسال رمز المرور المؤقت. يرجى المحاولة مرة أخرى لاحقًا.";
     public static final String TRY_AFTER_SECONDS_ARABIC = "يرجى الانتظار لمدة %d ثانية قبل طلب رمز مرور مؤقت آخر.";

@@ -69,6 +69,15 @@ public class AuthenticationController {
 		return customerService.updatePassword(updatePasswordRequest, user, lang);
 	}
 
+	@ApiOperation(value = "Delete customer account", authorizations = {
+			@io.swagger.annotations.Authorization(value = "jwtToken") })
+	@DeleteMapping("/close/account")
+	public ResponseEntity<?> deleteAccount(HttpServletRequest request,
+			@RequestHeader("Language") LanguageType lang) {
+		Customer user = baseService.resolveUser(request);
+		return customerService.deleteAccount(user, lang);
+	}
+
 	@ApiOperation(value = "Admin Login")
 	@PostMapping("/open/admin/login")
 	public ResponseEntity<?> portalLoginRequest(@Valid @RequestBody AdminLoginRequest loginRequest,

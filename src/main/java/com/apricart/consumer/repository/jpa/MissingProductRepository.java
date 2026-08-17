@@ -12,6 +12,7 @@ import java.util.List;
  */
 public interface MissingProductRepository extends JpaRepository<MissingProduct, Long> {
     List<MissingProduct> findByCustomerId(Long customerId);
+    void deleteByCustomerId(Long customerId);
 
 
 }

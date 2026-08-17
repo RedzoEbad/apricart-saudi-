@@ -21,6 +21,8 @@ public class ResponseMessage {
     public static final String OTP_NOT_FOUND = "Sorry, OTP doesn't exist.";
     public static final String PASSWORD_RESET_FAILED = "Sorry, password reset failed.";
     public static final String ACCOUNT_NOT_FOUND = "Account doesn't exist.";
+    public static final String ACCOUNT_DELETED_SUCCESSFULLY = "Your account has been deleted successfully.";
+    public static final String ACCOUNT_DELETE_FAILED = "Failed to delete account. Please try again later.";
     public static final String PASSWORD_UPDATED_SUCCESS = "You’ve successfully set a new password.";
     public static final String OTP_RETRIEVED_SUCCESSFULLY = "OTP retrieved successfully" ;
 
