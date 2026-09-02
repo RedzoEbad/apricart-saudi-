@@ -1,0 +1,8 @@
+# Database Standards
+Use least-privilege DB identities.
+Never put credentials in source code.
+Apply tenant/resource filters consistently.
+Use parameterized/safely constructed queries.
+Review indexes and query performance.
+Treat migrations as controlled changes with rollback considerations.
+Never give runtime accounts schema-admin privileges.

@@ -1,0 +1,4 @@
+# Project Overview
+Read the repository structure, architecture docs, relevant tests and configuration before changing code.
+Prefer existing patterns over introducing new abstractions.
+For non-trivial work, create/read the relevant plan under `plans/`.

@@ -1,0 +1,5 @@
+# Testing
+Every business-logic change requires appropriate automated tests.
+Cover success, validation failures, exceptions, boundaries, authorization and relevant dependency failures.
+Use unit tests for isolated logic and integration tests for component boundaries.
+Never delete or weaken a test solely to make implementation pass.

@@ -1,0 +1,10 @@
+# Java / Spring Boot Standards
+Use Maven for dependency and build management.
+Follow existing package structure: controller, service, repository, security, configuration.
+Prefer explicit types, small cohesive methods, constructor injection and clear names.
+Avoid duplicated business logic, giant classes, mutable global state and unnecessary abstractions.
+Required checks:
+```bash
+mvn -B verify
+mvn -B test
+```

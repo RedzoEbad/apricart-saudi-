@@ -1,0 +1,5 @@
+# Security
+Treat security as a design requirement.
+Check authentication, authorization, RBAC, tenant/resource isolation, injection, SSRF, XSS, path traversal, file upload, secrets, cryptography, rate limits, replay/idempotency, dependency risk, logging and auditability.
+Never trust frontend-only authorization.
+Never hardcode secrets.

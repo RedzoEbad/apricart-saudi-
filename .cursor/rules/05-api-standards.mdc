@@ -1,0 +1,7 @@
+# API Standards
+Validate all untrusted input.
+Return only required data.
+Enforce authentication and authorization server-side.
+Use consistent status codes and error schemas.
+Protect sensitive endpoints against replay and abuse.
+Do not expose internal stack traces or secrets.

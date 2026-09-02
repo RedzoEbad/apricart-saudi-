@@ -1,0 +1,5 @@
+# Architecture
+Keep API, business/service, persistence and infrastructure responsibilities separated according to the existing project architecture.
+Do not introduce cross-layer shortcuts without justification.
+Before changing shared interfaces, identify callers and tests.
+Document material architectural changes in the plan.

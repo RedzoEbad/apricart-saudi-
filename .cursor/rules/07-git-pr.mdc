@@ -1,0 +1,6 @@
+# Git and PR
+Use branch names containing the Jira ID.
+Keep commits focused.
+PRs must explain what changed, why, testing, security impact and risks.
+CI must pass before merge.
+Do not bypass required review or CI.

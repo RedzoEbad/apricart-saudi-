@@ -1,0 +1,5 @@
+# AI Development
+Use Cursor/Claude for planning, implementation assistance, testing and review.
+Do not blindly accept generated code.
+Do not expose credentials, private keys, production secrets or sensitive customer data to unapproved AI systems.
+For non-trivial changes, use a plan and perform an AI-assisted review plus human review.
