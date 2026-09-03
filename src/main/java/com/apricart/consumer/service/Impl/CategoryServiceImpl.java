@@ -6,6 +6,7 @@ import com.apricart.consumer.exceptions.DuplicateResourceException;
 import com.apricart.consumer.exceptions.ResourceNotFoundException;
 import com.apricart.consumer.generic.Response;
 import com.apricart.consumer.repository.jpa.CategoryRepository;
+import com.apricart.consumer.repository.jpa.ProductRepository;
 import com.apricart.consumer.security.dto.request.CategoryRequestDTO;
 import com.apricart.consumer.security.dto.response.CategoryResponseDTO;
 import com.apricart.consumer.security.enums.LanguageType;
@@ -38,6 +39,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
     @Autowired
+    private ProductRepository productRepository;
+    @Autowired
     private ProductWarehouseService productWarehouseService;
     @Autowired
     private ImageUtils imageUtils;
@@ -46,9 +49,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<Category> getAllCategories(LanguageType lang){
-        LOGGER.info("Getting all categories");
+        LOGGER.info("Getting all categories (admin: non-deleted)");
         List<Category> categories = categoryRepository.findAll().stream()
-                .filter(Category::getStatus)
+                .filter(c -> !Boolean.TRUE.equals(c.getIsDeleted()))
                 .peek(c -> {
                     if (c.getImage() != null) {
                         c.setImage(imageUtils.getImagePath(c.getImage()));
@@ -98,7 +101,8 @@ public class CategoryServiceImpl implements CategoryService {
     public List<Category> getActiveCategories(LanguageType lang) {
         LOGGER.info("Getting active categories");
         List<Category> categories = categoryRepository.findAll().stream()
-                .filter(Category::getStatus)
+                .filter(c -> !Boolean.TRUE.equals(c.getIsDeleted()))
+                .filter(c -> Boolean.TRUE.equals(c.getStatus()))
                 .peek(c -> {
                     if (c.getImage() != null) {
                         c.setImage(imageUtils.getImagePath(c.getImage()));
@@ -190,10 +194,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void deleteCategory(Long id, LanguageType languageType) {
-        LOGGER.info("Deactivating category for id: {}", id);
+        LOGGER.info("Soft-deleting category for id: {}", id);
         Category existingCategory = findById(id, languageType);
-        if(existingCategory.getStatus()) {
-            existingCategory.setStatus(false);
+        if (!Boolean.TRUE.equals(existingCategory.getIsDeleted())) {
+            existingCategory.setIsDeleted(true);
             save(existingCategory);
         }
     }
@@ -243,8 +247,15 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryResponseDTO> getCategoriesByWarehouseId(Long warehouseId) {
-
-        List<Category> categories = productWarehouseService.findCategoriesByWarehouseId(warehouseId);
+        List<Category> categories;
+        if (com.apricart.consumer.utils.SecurityUtils.isAdminAuthenticated()) {
+            // Admin JWT on open API: all non-deleted (active + inactive)
+            categories = categoryRepository.findAll().stream()
+                    .filter(c -> !Boolean.TRUE.equals(c.getIsDeleted()))
+                    .collect(Collectors.toList());
+        } else {
+            categories = productWarehouseService.findCategoriesByWarehouseId(warehouseId);
+        }
         setCategoryImages(categories);
         categories.sort(Comparator.comparingInt(Category::getPosition));
 
@@ -253,12 +264,31 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<Category> getDiscountedCategories(Boolean IsDiscountedCategory) {
-        return categoryRepository.findAllByIsDiscountedCategory(IsDiscountedCategory);
+        return categoryRepository.findAllByIsDiscountedCategory(IsDiscountedCategory).stream()
+                .filter(c -> !Boolean.TRUE.equals(c.getIsDeleted()))
+                .collect(Collectors.toList());
     }
 
     @Override
     public Boolean checkIsDiscountedCategory(Long categoryId, LanguageType languageType) {
         return findById(categoryId, languageType).getIsDiscountedCategory();
+    }
+
+    @Override
+    public void refreshDiscountedFlag(Long categoryId) {
+        if (categoryId == null) {
+            return;
+        }
+        categoryRepository.findById(categoryId).ifPresent(category -> {
+            boolean hasDiscountedProduct =
+                    productRepository.existsByCategory_IdAndIsDiscountedTrueAndIsActiveTrueAndIsDeletedFalse(categoryId);
+            Boolean current = Boolean.TRUE.equals(category.getIsDiscountedCategory());
+            if (hasDiscountedProduct != current) {
+                LOGGER.info("Updating category {} isDiscountedCategory to {}", categoryId, hasDiscountedProduct);
+                category.setIsDiscountedCategory(hasDiscountedProduct);
+                categoryRepository.save(category);
+            }
+        });
     }
 
     public void setCategoryImages(List<Category> categories) {

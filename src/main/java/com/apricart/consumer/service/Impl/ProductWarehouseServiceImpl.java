@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.apricart.consumer.security.constants.ArabicResponseMessages.*;
 import static com.apricart.consumer.security.constants.ResponseMessage.*;
@@ -174,14 +175,20 @@ public class ProductWarehouseServiceImpl implements ProductWarehouseService {
     @Override
     public List<ProductWarehouseResponseDTO> findByCategoryIdAndWarehouseId(Long categoryId, Long warehouseId, int page, int size, LanguageType languageType) {
         PageRequest pageRequest = PageRequest.of(page, size);
-        List<ProductWarehouse> productWarehouses = productWarehouseRepository.findProductByCategoryIdAndWarehouseId(categoryId, warehouseId, pageRequest).getContent();
+        boolean includeInactive = com.apricart.consumer.utils.SecurityUtils.isAdminAuthenticated();
+        List<ProductWarehouse> productWarehouses = productWarehouseRepository
+                .findProductByCategoryIdAndWarehouseId(categoryId, warehouseId, includeInactive, pageRequest)
+                .getContent();
         return ProductWarehouse.toDTOList(productWarehouses, productMapper, languageType);
     }
 
     @Override
     public List<ProductWarehouseResponseDTO> findBySubCategoryIdAndWarehouseId(Long subCategoryId, Long warehouseId, int page, int size, LanguageType languageType) {
         PageRequest pageRequest = PageRequest.of(page, size);
-        List<ProductWarehouse> productWarehouses = productWarehouseRepository.findProductBySubCategoryIdAndWarehouseId(subCategoryId, warehouseId,pageRequest).getContent();
+        boolean includeInactive = com.apricart.consumer.utils.SecurityUtils.isAdminAuthenticated();
+        List<ProductWarehouse> productWarehouses = productWarehouseRepository
+                .findProductBySubCategoryIdAndWarehouseId(subCategoryId, warehouseId, includeInactive, pageRequest)
+                .getContent();
         return ProductWarehouse.toDTOList(productWarehouses, productMapper, languageType);
     }
 
@@ -195,7 +202,8 @@ public class ProductWarehouseServiceImpl implements ProductWarehouseService {
     @Override
     public Page<ProductWarehouseResponseDTO> findAllByWarehouseId(Long warehouseId, int page, int size, LanguageType languageType) {
         PageRequest pageRequest = PageRequest.of(page, size);
-        Page<ProductWarehouse> productWarehouses = productWarehouseRepository.findAllActiveByWarehouseId(warehouseId, pageRequest);
+        boolean includeInactive = com.apricart.consumer.utils.SecurityUtils.isAdminAuthenticated();
+        Page<ProductWarehouse> productWarehouses = productWarehouseRepository.findAllActiveByWarehouseId(warehouseId, includeInactive, pageRequest);
         List<ProductWarehouseResponseDTO> content = ProductWarehouse.toDTOList(productWarehouses.getContent(), productMapper, languageType);
         return new PageImpl<>(content, pageRequest, productWarehouses.getTotalElements());
     }
@@ -206,13 +214,19 @@ public class ProductWarehouseServiceImpl implements ProductWarehouseService {
         List<Category> warehouseCategories = productWarehouseRepository.findDistinctCategoriesByWarehouseId(warehouseId);
         LOGGER.info("Found {} warehouse categories: {}", warehouseCategories.size(), warehouseCategories);
 
-        List<Category> discountedCategories = categoryService.getDiscountedCategories(Boolean.TRUE);
-        LOGGER.info("Found {} discounted categories: {}", discountedCategories.size(), discountedCategories);
+        List<Category> discountedCategories = categoryService.getDiscountedCategories(Boolean.TRUE).stream()
+                .filter(category -> !Boolean.TRUE.equals(category.getIsDeleted()))
+                .filter(category -> Boolean.TRUE.equals(category.getStatus()))
+                .collect(Collectors.toList());
+        LOGGER.info("Found {} active discounted categories: {}", discountedCategories.size(), discountedCategories);
 
-        // Combine categories using a Set to remove duplicates
-        Set<Category> uniqueCategories = new LinkedHashSet<>(warehouseCategories);
+        // Only keep active, non-deleted warehouse categories, then merge active discounted ones
+        Set<Category> uniqueCategories = warehouseCategories.stream()
+                .filter(category -> !Boolean.TRUE.equals(category.getIsDeleted()))
+                .filter(category -> Boolean.TRUE.equals(category.getStatus()))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
         uniqueCategories.addAll(discountedCategories);
-        LOGGER.info("After deduplication, {} unique categories: {}", uniqueCategories.size(), uniqueCategories);
+        LOGGER.info("After status filter + deduplication, {} unique categories: {}", uniqueCategories.size(), uniqueCategories);
 
         return new ArrayList<>(uniqueCategories);
     }

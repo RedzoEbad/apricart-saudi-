@@ -19,6 +19,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findProductByZohoId(Long id, Pageable pageable);
     Product findProductBySku(String sku);
     Page<Product> findProductByIsDiscounted(Boolean isDiscounted, Pageable pageable);
+
+    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Product p "
+            + "WHERE p.category.id = :categoryId AND p.isDiscounted = true AND p.isActive = true "
+            + "AND (p.isDeleted = false OR p.isDeleted IS NULL)")
+    boolean existsByCategory_IdAndIsDiscountedTrueAndIsActiveTrueAndIsDeletedFalse(@Param("categoryId") Long categoryId);
+
     Long findTopByOrderByIdDesc();
 
     boolean existsByTitleIgnoreCaseAndSubCategory(String title, SubCategory subCategory);

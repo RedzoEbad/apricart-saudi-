@@ -53,6 +53,10 @@ public class Category extends BaseEntity {
     @Column
     private Boolean status;
 
+    /** Soft delete — hidden from admin and app. Separate from {@link #status} (show/unshow on app). */
+    @Column
+    private Boolean isDeleted;
+
     @Column(name = "image", columnDefinition = "TEXT")
     @Field(index = Index.YES, analyze = Analyze.NO, store = Store.YES)
     private String image;
@@ -65,6 +69,7 @@ public class Category extends BaseEntity {
                 .image(category.getImage())
                 .level(category.getLevel())
                 .status(category.getStatus())
+                .isDeleted(Boolean.TRUE.equals(category.getIsDeleted()))
                 .isDiscountedCategory(category.getIsDiscountedCategory())
                 .position(category.getPosition())
                 .build();
@@ -86,7 +91,9 @@ public class Category extends BaseEntity {
                 .image(categoryRequestDTO.getImage())
                 .status(categoryRequestDTO.getStatus())
                 .position(categoryRequestDTO.getPosition())
-                .isDiscountedCategory(categoryRequestDTO.getIsDiscountedCategory())
+                // Computed from products with isDiscounted=true — not set via category APIs
+                .isDiscountedCategory(false)
+                .isDeleted(false)
                 .build();
     }
 

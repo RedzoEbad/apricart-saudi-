@@ -13,7 +13,10 @@ public interface SubCategoryRepository extends JpaRepository<SubCategory, Long> 
     SubCategory findSubCategoryByName(String name);
 
     List<SubCategory> findSubCategoryByLevel(LevelType level);
-    @Query("SELECT sc FROM SubCategory sc WHERE sc.category = :category AND EXISTS (SELECT pw FROM ProductWarehouse pw WHERE pw.subCategory = sc AND pw.warehouse.id = :warehouseId AND pw.inStock = true AND pw.quantityInStock > 0)")
+    @Query("SELECT sc FROM SubCategory sc WHERE sc.category = :category "
+            + "AND (sc.isDeleted = false OR sc.isDeleted IS NULL) "
+            + "AND EXISTS (SELECT pw FROM ProductWarehouse pw WHERE pw.subCategory = sc AND pw.warehouse.id = :warehouseId AND pw.inStock = true AND pw.quantityInStock > 0 "
+            + "AND (pw.product.isDeleted = false OR pw.product.isDeleted IS NULL))")
     List<SubCategory> findSubCategoriesByCategory(Category category, @Param("warehouseId") Long warehouseId);
 
 

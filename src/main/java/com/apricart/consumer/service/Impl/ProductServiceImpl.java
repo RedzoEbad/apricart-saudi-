@@ -74,12 +74,15 @@ public class ProductServiceImpl implements ProductService {
         Product savedProduct = save(product);
 
         createMissingWarehouseEntriesForProduct(savedProduct);
+        categoryService.refreshDiscountedFlag(
+                savedProduct.getCategory() != null ? savedProduct.getCategory().getId() : null);
     }
 
     @Override
     public Product updateProduct(ProductRequestDTO productRequestDTO, LanguageType languageType) {
         LOGGER.info("Updating product: {}", productRequestDTO);
         Product existingProduct = findById(productRequestDTO.getId(),languageType);
+        Long previousCategoryId = existingProduct.getCategory() != null ? existingProduct.getCategory().getId() : null;
         SubCategory subCategory = productRequestDTO.getSubCategoryId() == null
                 ? existingProduct.getSubCategory()
                 : subCategoryService.findById(productRequestDTO.getSubCategoryId(), languageType);
@@ -120,6 +123,12 @@ public class ProductServiceImpl implements ProductService {
             pw.setCategory(existingProduct.getCategory());
             pw.setSubCategory(existingProduct.getSubCategory());
             productWarehouseRepository.save(pw);
+        }
+
+        Long currentCategoryId = existingProduct.getCategory() != null ? existingProduct.getCategory().getId() : null;
+        categoryService.refreshDiscountedFlag(currentCategoryId);
+        if (previousCategoryId != null && !previousCategoryId.equals(currentCategoryId)) {
+            categoryService.refreshDiscountedFlag(previousCategoryId);
         }
 
         return existingProduct;
@@ -188,11 +197,13 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void deleteProduct(Long id, LanguageType languageType) {
-        LOGGER.info("Deactivating product status for id: {}", id);
+        LOGGER.info("Soft-deleting product for id: {}", id);
         Product existingProduct = findById(id, languageType);
-        if (existingProduct.getIsActive()) {
-            existingProduct.setIsActive(false);
+        if (!Boolean.TRUE.equals(existingProduct.getIsDeleted())) {
+            existingProduct.setIsDeleted(true);
             save(existingProduct);
+            categoryService.refreshDiscountedFlag(
+                    existingProduct.getCategory() != null ? existingProduct.getCategory().getId() : null);
         }
     }
 
@@ -203,9 +214,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> findAllProducts(LanguageType lang, int page, int size) {
-        LOGGER.info("Getting all products");
+        LOGGER.info("Getting all products (admin: non-deleted)");
         PageRequest pageRequest = PageRequest.of(page, size);
         List<Product> products = productRepository.findAll(pageRequest).stream()
+                .filter(p -> !Boolean.TRUE.equals(p.getIsDeleted()))
                 .peek(p -> {
                     if (p.getImage() != null) {
                         p.setImage(imageUtils.getImagePath(p.getImage()));
@@ -305,6 +317,7 @@ public class ProductServiceImpl implements ProductService {
         LOGGER.info("Getting discounted products");
         Pageable pageable = PageRequest.of(pageNo, pageSize);
         List<Product> products = productRepository.findProductByIsDiscounted(Boolean.TRUE, pageable).stream()
+                .filter(p -> !Boolean.TRUE.equals(p.getIsDeleted()))
                 .sorted(Comparator.comparingInt(Product::getPosition))
                 .collect(Collectors.toList());
 
@@ -337,7 +350,10 @@ public class ProductServiceImpl implements ProductService {
         LOGGER.info("Updating product status for product id: {} to {}", id, status);
         Product existingProduct = findById(id, languageType);
         existingProduct.setIsActive(status == null ? existingProduct.getIsActive() : status);
-        return save(existingProduct);
+        Product saved = save(existingProduct);
+        categoryService.refreshDiscountedFlag(
+                saved.getCategory() != null ? saved.getCategory().getId() : null);
+        return saved;
     }
 
     @Override

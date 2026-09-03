@@ -44,6 +44,10 @@ public class SubCategory {
     @Column
     private Boolean status;
 
+    /** Soft delete — hidden from admin and app. Separate from {@link #status} (show/unshow on app). */
+    @Column
+    private Boolean isDeleted;
+
     @Lob
     @Type(type="org.hibernate.type.TextType")
     @Column
@@ -70,6 +74,7 @@ public class SubCategory {
                 .image(subCategory.getImage())
                 .level(subCategory.getLevel())
                 .status(subCategory.getStatus())
+                .isDeleted(Boolean.TRUE.equals(subCategory.getIsDeleted()))
                 .position(subCategory.getPosition())
                 .categoryId(subCategory.getCategory().getId())
                 .build();
@@ -89,6 +94,7 @@ public class SubCategory {
                 .image(dto.getImage())
                 .status(dto.getStatus())
                 .position(dto.getPosition())
+                .isDeleted(false)
                 .build();
     }
 }

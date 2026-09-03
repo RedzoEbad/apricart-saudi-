@@ -49,8 +49,9 @@ public class SubCategoryServiceImpl implements SubCategoryService {
 
     @Override
     public List<SubCategory> getAllSubCategories(LanguageType languageType) {
-        LOGGER.info("Retrieving all sub categories");
+        LOGGER.info("Retrieving all sub categories (admin: non-deleted)");
         List<SubCategory> categories = subCategoryRepository.findAll().stream()
+                .filter(c -> !Boolean.TRUE.equals(c.getIsDeleted()))
                 .peek(c -> {
                     if (c.getImage() != null) {
                         c.setImage(imageUtils.getImagePath(c.getImage()));
@@ -87,8 +88,19 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     public List<SubCategory> findByCategoryId(Long id, LanguageType languageType, Long warehouseId) {
         LOGGER.info("Finding sub categories by category id: {}", id);
         Category category = categoryService.findById(id, languageType);
-//        return category.getIsDiscountedCategory() ? subCategoryRepository.findDiscountedSubCategoriesByCategory(category) : subCategoryRepository.findSubCategoriesByCategory(category, warehouseId);
-        return subCategoryRepository.findSubCategoriesByCategory(category, warehouseId);
+        List<SubCategory> subCategories;
+        if (com.apricart.consumer.utils.SecurityUtils.isAdminAuthenticated()) {
+            subCategories = subCategoryRepository.findAll().stream()
+                    .filter(sc -> sc.getCategory() != null && id.equals(sc.getCategory().getId()))
+                    .filter(sc -> !Boolean.TRUE.equals(sc.getIsDeleted()))
+                    .collect(Collectors.toList());
+        } else {
+            subCategories = subCategoryRepository.findSubCategoriesByCategory(category, warehouseId).stream()
+                    .filter(sc -> !Boolean.TRUE.equals(sc.getIsDeleted()))
+                    .filter(sc -> Boolean.TRUE.equals(sc.getStatus()))
+                    .collect(Collectors.toList());
+        }
+        return subCategories;
     }
 
     @Override
@@ -101,7 +113,8 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     public List<SubCategory> getActiveSubCategories(LanguageType languageType) {
         LOGGER.info("Retrieving active sub categories");
         List<SubCategory> categories = subCategoryRepository.findAll().stream()
-                .filter(SubCategory::getStatus)
+                .filter(c -> !Boolean.TRUE.equals(c.getIsDeleted()))
+                .filter(c -> Boolean.TRUE.equals(c.getStatus()))
                 .peek(c -> {
                     if (c.getImage() != null) {
                         c.setImage(imageUtils.getImagePath(c.getImage()));
@@ -205,10 +218,10 @@ public class SubCategoryServiceImpl implements SubCategoryService {
 
     @Override
     public void deleteSubCategory(Long id, LanguageType languageType) {
-        LOGGER.info("Deactivating sub category for id: {}", id);
+        LOGGER.info("Soft-deleting sub category for id: {}", id);
         SubCategory existingSubCategory = findById(id, languageType);
-        if(existingSubCategory.getStatus()) {
-            existingSubCategory.setStatus(false);
+        if (!Boolean.TRUE.equals(existingSubCategory.getIsDeleted())) {
+            existingSubCategory.setIsDeleted(true);
             save(existingSubCategory);
         }
     }

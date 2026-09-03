@@ -19,6 +19,7 @@ public class CategoryResponseDTO {
     private LevelType level;
     private Integer position;
     private Boolean status;
+    private Boolean isDeleted;
     private Boolean isDiscountedCategory;
     private String image;
     private List<SubCategoryResponseDTO> subCategories;

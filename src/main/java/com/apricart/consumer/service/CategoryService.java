@@ -29,4 +29,5 @@ public interface CategoryService {
     List<CategoryResponseDTO> getCategoriesByWarehouseId(Long warehouseId);
     List<Category> getDiscountedCategories(Boolean IsDiscountedCategory);
     Boolean checkIsDiscountedCategory(Long categoryId, LanguageType languageType);
+    void refreshDiscountedFlag(Long categoryId);
 }

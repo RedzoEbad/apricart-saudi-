@@ -27,6 +27,7 @@ public class ProductDetailDTO {
     private String arabicDescription;
 
     private Boolean isActive;
+    private Boolean isDeleted;
     private Boolean isFeatured;
     private Boolean isTrending;
     private Boolean isDiscounted;

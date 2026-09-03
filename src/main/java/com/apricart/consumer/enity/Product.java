@@ -56,6 +56,10 @@ public class Product extends BaseEntity {
     @Column
     private Boolean isActive;
 
+    /** Soft delete — hidden from admin and app. Separate from {@link #isActive} (show/unshow on app). */
+    @Column
+    private Boolean isDeleted;
+
     @Column
     private Boolean isFeatured;
 
@@ -111,7 +115,8 @@ public class Product extends BaseEntity {
                 .brandNameArabic(product.getBrand() != null ? product.getBrand().getArabicName() : null)
                 .position(product.getPosition())
                 .image(product.getImage())
-                .isActive(product.getIsActive());
+                .isActive(product.getIsActive())
+                .isDeleted(Boolean.TRUE.equals(product.getIsDeleted()));
     }
 
     public static ProductResponseDTO toDTO(Product product) {
@@ -144,6 +149,7 @@ public class Product extends BaseEntity {
                 .position(dto.getPosition() != null ? dto.getPosition() : 0)
                 .image(dto.getImage())
                 .isActive(dto.getIsActive())
+                .isDeleted(false)
                 .zohoId(dto.getZohoId())
                 .build();
     }

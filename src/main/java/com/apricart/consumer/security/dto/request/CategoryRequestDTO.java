@@ -13,6 +13,5 @@ public class CategoryRequestDTO {
     private LevelType level;
     private Integer position;
     private Boolean status;
-    private Boolean isDiscountedCategory;
     private String image;
 }

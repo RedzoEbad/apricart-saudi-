@@ -20,6 +20,7 @@ public class SubCategoryResponseDTO {
     private LevelType level;
     private Integer position;
     private Boolean status;
+    private Boolean isDeleted;
     private String image;
     private Long categoryId;
     private List<ProductDetailDTO> products;

@@ -17,6 +17,7 @@ public class ProductResponseDTO {
     private String arabicDescription;
     private String sku;
     private Boolean isActive;
+    private Boolean isDeleted;
     private Boolean isFeatured;
     private Boolean isTrending;
     private Boolean isDiscounted;
