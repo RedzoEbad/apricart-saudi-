@@ -27,6 +27,7 @@ public interface CategoryService {
     void deleteCategory(Long id, LanguageType languageType);
     ResponseEntity<?> addOrUpdateCategoryImage(Long categoryId, MultipartFile image, Customer customer, LanguageType lang);
     List<CategoryResponseDTO> getCategoriesByWarehouseId(Long warehouseId);
+    List<Category> findVisibleAppCategories();
     List<Category> getDiscountedCategories(Boolean IsDiscountedCategory);
     Boolean checkIsDiscountedCategory(Long categoryId, LanguageType languageType);
     void refreshDiscountedFlag(Long categoryId);

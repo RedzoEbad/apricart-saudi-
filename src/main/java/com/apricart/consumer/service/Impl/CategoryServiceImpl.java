@@ -254,12 +254,23 @@ public class CategoryServiceImpl implements CategoryService {
                     .filter(c -> !Boolean.TRUE.equals(c.getIsDeleted()))
                     .collect(Collectors.toList());
         } else {
-            categories = productWarehouseService.findCategoriesByWarehouseId(warehouseId);
+            categories = findVisibleAppCategories();
         }
         setCategoryImages(categories);
         categories.sort(Comparator.comparingInt(Category::getPosition));
 
         return Category.toDTOList(categories);
+    }
+
+    @Override
+    public List<Category> findVisibleAppCategories() {
+        // App / web: status=true and not soft-deleted.
+        // isDiscountedCategory does not gate listing (reserved for future home/discount UI).
+        return categoryRepository.findAll().stream()
+                .filter(c -> !Boolean.TRUE.equals(c.getIsDeleted()))
+                .filter(c -> Boolean.TRUE.equals(c.getStatus()))
+                .sorted(Comparator.comparingInt(Category::getPosition))
+                .collect(Collectors.toList());
     }
 
     @Override

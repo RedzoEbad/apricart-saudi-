@@ -210,25 +210,8 @@ public class ProductWarehouseServiceImpl implements ProductWarehouseService {
 
     @Override
     public List<Category> findCategoriesByWarehouseId(Long warehouseId) {
-        LOGGER.info("Fetching categories for warehouseId: {}", warehouseId);
-        List<Category> warehouseCategories = productWarehouseRepository.findDistinctCategoriesByWarehouseId(warehouseId);
-        LOGGER.info("Found {} warehouse categories: {}", warehouseCategories.size(), warehouseCategories);
-
-        List<Category> discountedCategories = categoryService.getDiscountedCategories(Boolean.TRUE).stream()
-                .filter(category -> !Boolean.TRUE.equals(category.getIsDeleted()))
-                .filter(category -> Boolean.TRUE.equals(category.getStatus()))
-                .collect(Collectors.toList());
-        LOGGER.info("Found {} active discounted categories: {}", discountedCategories.size(), discountedCategories);
-
-        // Only keep active, non-deleted warehouse categories, then merge active discounted ones
-        Set<Category> uniqueCategories = warehouseCategories.stream()
-                .filter(category -> !Boolean.TRUE.equals(category.getIsDeleted()))
-                .filter(category -> Boolean.TRUE.equals(category.getStatus()))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        uniqueCategories.addAll(discountedCategories);
-        LOGGER.info("After status filter + deduplication, {} unique categories: {}", uniqueCategories.size(), uniqueCategories);
-
-        return new ArrayList<>(uniqueCategories);
+        LOGGER.info("Fetching active categories for app/home (warehouseId={} kept for API compatibility)", warehouseId);
+        return categoryService.findVisibleAppCategories();
     }
 
     @Override
